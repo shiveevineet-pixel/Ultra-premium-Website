@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBlueprintCanvas();
     initClocks();
     initScrollReveals();
+    initMobileMenu();
     initPageTransitions();
     initAuthSession();
     initBookingGuard();
@@ -786,75 +787,91 @@ function initScrollReveals() {
     });
 }
 
-/* 11. LIQUID WAVE CANVAS PAGE TRANSITIONS */
+/* 11. MOBILE MENU — standalone, zero dependencies on GSAP/transition-path */
+function initMobileMenu() {
+    const toggle = document.getElementById('menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    if (!toggle || !menu) return;
+
+    function openMenu() {
+        menu.classList.add('active');
+        toggle.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (lenis) lenis.stop();
+        // Push state so back button closes menu instead of leaving the site
+        history.pushState({ mobileMenuOpen: true }, '');
+    }
+
+    function closeMenu() {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+        document.body.style.overflow = '';
+        if (lenis) lenis.start();
+    }
+
+    // Hamburger toggle
+    toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (menu.classList.contains('active')) {
+            closeMenu();
+            // Pop the history state we added
+            if (history.state && history.state.mobileMenuOpen) {
+                history.back();
+            }
+        } else {
+            openMenu();
+        }
+    });
+
+    // Back button support — close menu instead of leaving site
+    window.addEventListener('popstate', (e) => {
+        if (menu.classList.contains('active')) {
+            closeMenu();
+        }
+    });
+
+    // Handle ALL links inside the mobile menu
+    menu.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (!link) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const href = link.getAttribute('href');
+        closeMenu();
+        // Pop the history state we added
+        if (history.state && history.state.mobileMenuOpen) {
+            history.back();
+        }
+
+        if (href && href.startsWith('#')) {
+            // Internal anchor link — scroll to section
+            const targetEl = document.querySelector(href);
+            if (targetEl) {
+                setTimeout(() => {
+                    if (lenis) {
+                        lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+                    } else {
+                        targetEl.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 400);
+            }
+        } else if (href && href !== '#') {
+            // External link (e.g. auth/login.html)
+            setTimeout(() => {
+                window.location.href = href;
+            }, 400);
+        }
+    });
+}
+
+/* 12. LIQUID WAVE DESKTOP PAGE TRANSITIONS */
 function initPageTransitions() {
-    // IMPORTANT: Do NOT include .mobile-nav-link here — they have their own handler below
     const navLinks = document.querySelectorAll('.nav-link, .nav-cta, .footer-nav a, .scroll-top-btn');
     const path = document.querySelector('.transition-path');
 
-    // Mobile Menu Button interaction — set up FIRST, before the path check
-    const toggle = document.getElementById('menu-toggle');
-    const menu = document.getElementById('mobile-menu');
-    if (toggle && menu) {
-        toggle.addEventListener('click', () => {
-            menu.classList.toggle('active');
-            toggle.classList.toggle('active');
-        });
-    }
-
-    // Mobile nav link clicks — these work independently of the transition path
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            const target = link.getAttribute('href');
-            if (menu) menu.classList.remove('active');
-            if (toggle) toggle.classList.remove('active');
-            if (target && target.startsWith('#')) {
-                const targetEl = document.querySelector(target);
-                if (targetEl) {
-                    setTimeout(() => {
-                        if (lenis) {
-                            lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
-                        } else {
-                            targetEl.scrollIntoView({ behavior: 'smooth' });
-                        }
-                    }, 350);
-                }
-            } else if (target) {
-                setTimeout(() => { window.location.href = target; }, 350);
-            }
-        });
-    });
-
-    // Mobile CTA button click
-    const mobileCta = document.querySelector('.mobile-menu-cta');
-    if (mobileCta) {
-        mobileCta.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            const target = mobileCta.getAttribute('href');
-            if (menu) menu.classList.remove('active');
-            if (toggle) toggle.classList.remove('active');
-            if (target && target.startsWith('#')) {
-                const targetEl = document.querySelector(target);
-                if (targetEl) {
-                    setTimeout(() => {
-                        if (lenis) {
-                            lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
-                        } else {
-                            targetEl.scrollIntoView({ behavior: 'smooth' });
-                        }
-                    }, 350);
-                }
-            } else if (target) {
-                setTimeout(() => { window.location.href = target; }, 350);
-            }
-        });
-    }
-
-    // Desktop nav link transitions (liquid wave animation)
     if (!path) return;
 
     navLinks.forEach(link => {
@@ -863,32 +880,25 @@ function initPageTransitions() {
             if (target && target.startsWith('#')) {
                 e.preventDefault();
 
-                // Close mobile navigation if active
-                if (menu) menu.classList.remove('active');
-
                 // Trigger liquid wave timeline
                 const tl = gsap.timeline();
 
-                // Curve in
                 tl.to(path, {
                     attr: { d: 'M 0 100 V 0 Q 50 0 100 0 V 100 Z' },
                     duration: 0.55,
                     ease: 'power3.in'
                 })
                     .call(() => {
-                        // Scroll instantly on cover
                         const targetEl = document.querySelector(target);
                         if (targetEl) {
                             lenis.scrollTo(targetEl, { immediate: true });
                         }
                     })
-                    // Wave out
                     .to(path, {
                         attr: { d: 'M 0 0 V 0 Q 50 0 100 0 V 0 Z' },
                         duration: 0.55,
                         ease: 'power3.out'
                     })
-                    // Reset parameters
                     .set(path, {
                         attr: { d: 'M 0 100 V 100 Q 50 100 100 100 V 100 Z' }
                     });

@@ -149,22 +149,22 @@
                 <span class="menu-bar"></span>
             </button>
         </nav>
-
-        <!-- Mobile Dropdown Menu -->
-        <div class="mobile-menu" id="mobile-menu">
-            <div class="mobile-menu-links">
-                <a href="#services" class="mobile-nav-link">Services</a>
-                <a href="#philosophy" class="mobile-nav-link">Philosophy</a>
-                <a href="#estimator" class="mobile-nav-link">Estimator</a>
-                <a href="#results" class="mobile-nav-link">Results</a>
-                <a href="#contact" class="mobile-nav-link">Contact</a>
-                <a href="auth/login.html" class="mobile-nav-link" id="mobile-auth-link">Sign In</a>
-                <a href="#" class="mobile-nav-link logout-action" id="mobile-logout-link" style="display: none;">Log
-                    Out</a>
-            </div>
-            <a href="#estimator" class="mobile-menu-cta">Book a Service</a>
-        </div>
     </header>
+
+    <!-- Mobile Fullscreen Menu — MUST be outside navbar-container to avoid stacking context / pointer-events trap -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-links">
+            <a href="#services" class="mobile-nav-link">Services</a>
+            <a href="#philosophy" class="mobile-nav-link">Philosophy</a>
+            <a href="#estimator" class="mobile-nav-link">Estimator</a>
+            <a href="#results" class="mobile-nav-link">Results</a>
+            <a href="#contact" class="mobile-nav-link">Contact</a>
+            <a href="auth/login.html" class="mobile-nav-link" id="mobile-auth-link">Sign In</a>
+            <a href="#" class="mobile-nav-link logout-action" id="mobile-logout-link" style="display: none;">Log
+                Out</a>
+        </div>
+        <a href="#estimator" class="mobile-menu-cta">Book a Service</a>
+    </div>
 
     <!-- MAIN SCROLL CONTAINER -->
     <main data-scroll-container>

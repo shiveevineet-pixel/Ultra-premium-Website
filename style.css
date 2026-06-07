@@ -381,6 +381,27 @@ body.hovering-interactive .cursor-dot {
 
 .mobile-menu {
     display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-bg);
+    z-index: 10000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 20px 40px;
+    pointer-events: none;
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu.active {
+    display: flex;
+    pointer-events: auto;
+    opacity: 1;
 }
 
 /* 6. HERO SECTION */
@@ -1544,23 +1565,6 @@ body.hovering-interactive .cursor-dot {
         z-index: 10001;
     }
 
-    /* Mobile Menu Dropdown Active */
-    .mobile-menu.active {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: var(--color-bg);
-        z-index: 10000;
-        padding: 100px 20px 40px;
-        pointer-events: auto;
-    }
-
     .mobile-menu-links {
         display: flex;
         flex-direction: column;
@@ -1578,6 +1582,8 @@ body.hovering-interactive .cursor-dot {
         touch-action: manipulation;
         cursor: pointer;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+        position: relative;
+        z-index: 10001;
     }
 
     .mobile-menu-cta {
@@ -1591,6 +1597,8 @@ body.hovering-interactive .cursor-dot {
         touch-action: manipulation;
         cursor: pointer;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10001;
     }
 
     .cursor-dot,
