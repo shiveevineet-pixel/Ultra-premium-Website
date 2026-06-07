@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamers Designs — Definitive Luxury Digital Infrastructure</title>
+    <meta name="description"
+        content="We engineer premium digital masterpieces, bespoke AI systems, and high-contrast editorial branding for visionary brands who refuse to look ordinary.">
+
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Core Style -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- GSAP & Scroll Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.36/dist/lenis.min.js" defer></script>
+
+    <!-- Three.js for 3D Platinum Ribbon -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+
+    <!-- Core Script -->
+    <script src="script.js" defer></script>
+    <script>
+        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+
+        async function initAuth() {
+            const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            window._supabase = _supabase;
+
+            const { data: { session } } = await _supabase.auth.getSession();
+            const user = session?.user;
+            if (user) {
+                const name = user.user_metadata?.full_name || user.email;
+                const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                document.getElementById('nav-auth-btn').style.display = 'none';
+                document.getElementById('nav-profile').style.display = 'flex';
+                document.getElementById('profile-initials').textContent = initials;
+                document.getElementById('dropdown-name').textContent = name;
+                document.getElementById('dropdown-email').textContent = user.email;
+                document.getElementById('mobile-logout-link').style.display = 'block';
+            }
+
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await _supabase.auth.signOut();
+                window.location.reload();
+            });
+            document.getElementById('mobile-logout-link').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await _supabase.auth.signOut();
+                window.location.reload();
+            });
+        }
+
+        window.addEventListener('load', () => {
+            initAuth();
+        });
+    </script>
+</head>
+
+<body>
+
+    <!-- 1. CUSTOM CURSOR -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- 2. PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-bg"></div>
+        <div class="preloader-content">
+            <div class="preloader-title">
+                <span class="char">D</span>
+                <span class="char">R</span>
+                <span class="char">E</span>
+                <span class="char">A</span>
+                <span class="char">M</span>
+                <span class="char">E</span>
+                <span class="char">R</span>
+                <span class="char">S</span>
+            </div>
+            <div class="preloader-line-container">
+                <div class="preloader-line"></div>
+            </div>
+            <div class="preloader-meta">
+                <span class="preloader-status">INITIATING CANVAS</span>
+                <span class="preloader-percent" id="preloader-percent">00%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. LIQUID TRANSITION OVERLAY -->
+    <svg class="transition-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="transition-path" d="M 0 100 V 100 Q 50 100 100 100 V 100 Z" fill="#0A0A0A" />
+    </svg>
+
+    <!-- 4. FLOATING NAVBAR -->
+    <header class="navbar-container">
+        <nav class="navbar" id="navbar">
+            <a href="#" class="nav-logo" data-magnetic>
+                <span class="logo-dot"></span>DREAMERS DESIGNS
+            </a>
+            <div class="nav-links">
+                <a href="#services" class="nav-link" data-magnetic>Services</a>
+                <a href="#philosophy" class="nav-link" data-magnetic>Philosophy</a>
+                <a href="#estimator" class="nav-link" data-magnetic>Estimator</a>
+                <a href="#results" class="nav-link" data-magnetic>Results</a>
+                <a href="#contact" class="nav-link" data-magnetic>Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="auth/login.html" class="nav-auth-link" id="nav-auth-btn" data-magnetic>Sign In</a>
+
+                <div class="nav-profile-container" id="nav-profile" style="display: none;">
+                    <button class="profile-trigger" id="profile-trigger" data-magnetic>
+                        <span class="profile-initials" id="profile-initials">--</span>
+                    </button>
+                    <div class="profile-dropdown" id="profile-dropdown">
+                        <div class="dropdown-header">
+                            <span class="dropdown-name" id="dropdown-name">Loading...</span>
+                            <span class="dropdown-email" id="dropdown-email">user@domain.com</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="#estimator" class="dropdown-item">My Configurator</a>
+                        <a href="#" class="dropdown-item" id="logout-btn">Log Out</a>
+                    </div>
+                </div>
+
+                <a href="#estimator" class="nav-cta" data-magnetic>
+                    <span>Book a Service</span>
+                    <svg viewBox="0 0 14 14" fill="none" class="arrow-svg">
+                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+            <!-- Mobile Menu Toggle -->
+            <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation">
+                <span class="menu-bar"></span>
+                <span class="menu-bar"></span>
+            </button>
+        </nav>
+
+        <!-- Mobile Dropdown Menu -->
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-menu-links">
+                <a href="#services" class="mobile-nav-link">Services</a>
+                <a href="#philosophy" class="mobile-nav-link">Philosophy</a>
+                <a href="#estimator" class="mobile-nav-link">Estimator</a>
+                <a href="#results" class="mobile-nav-link">Results</a>
+                <a href="#contact" class="mobile-nav-link">Contact</a>
+                <a href="auth/login.html" class="mobile-nav-link" id="mobile-auth-link">Sign In</a>
+                <a href="#" class="mobile-nav-link logout-action" id="mobile-logout-link" style="display: none;">Log
+                    Out</a>
+            </div>
+            <a href="#estimator" class="mobile-menu-cta">Book a Service</a>
+        </div>
+    </header>
+
+    <!-- MAIN SCROLL CONTAINER -->
+    <main data-scroll-container>
+
+        <!-- 5. HERO SECTION -->
+        <section class="hero" id="hero">
+            <!-- Asymmetrical grid lines helper -->
+            <div class="hero-grid-overlay">
+                <div class="grid-line line-v" style="left: 15%;"></div>
+                <div class="grid-line line-v" style="left: 50%;"></div>
+                <div class="grid-line line-v" style="left: 85%;"></div>
+                <div class="grid-line line-h" style="top: 30%;"></div>
+                <div class="grid-line line-h" style="top: 75%;"></div>
+            </div>
+
+            <!-- WebGL Canvas Context -->
+            <div class="canvas-wrapper">
+                <canvas id="hero-canvas"></canvas>
+            </div>
+
+            <div class="hero-canvas-label">
+                <div class="coords"><span class="label">SYS_TRACK:</span> <span id="coord-x">0.00</span>, <span
+                        id="coord-y">0.00</span></div>
+                <div class="status-indicator"><span class="pulse-ring"></span>3D RIBBON RUNNING</div>
+            </div>
+
+            <div class="hero-wrapper">
+                <div class="hero-meta">
+                    <span class="meta-tag">STUDIO PROJECT / V1.0</span>
+                    <span class="meta-serial">CH-8001 ZH</span>
+                </div>
+
+                <h1 class="hero-heading" id="hero-title">
+                    We engineer <br>
+                    <span class="serif-italic">digital masterpieces</span> <br>
+                    for visionary brands.
+                </h1>
+
+                <div class="hero-footer">
+                    <p class="hero-subtext">
+                        A Swiss-inspired interaction studio building bespoke web systems, autonomous intelligent agents,
+                        and refined brand identities that refuse to look ordinary.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#services" class="btn btn-primary" data-magnetic>
+                            <span class="btn-text">Explore Expertise</span>
+                            <div class="btn-bg-fill"></div>
+                        </a>
+                        <a href="#contact" class="btn btn-secondary" data-magnetic>
+                            <span class="btn-text">Start Collaboration</span>
+                            <div class="btn-bg-fill"></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="scroll-down-indicator">
+                <span class="line"></span>
+                <span class="text">SCROLL TO COLLABORATE</span>
+            </div>
+        </section>
+
+        <!-- 6. MANIFESTO SECTION -->
+        <section class="manifesto" id="philosophy">
+            <div class="container">
+                <div class="section-label">01 / MANIFESTO</div>
+                <div class="manifesto-grid">
+                    <div class="manifesto-left">
+                        <h2 class="manifesto-title scramble-text" data-scramble="Human Intent">Human Intent.</h2>
+                    </div>
+                    <div class="manifesto-right">
+                        <p class="manifesto-paragraph reveal-words">
+                            In an era flooded with generic templates, robotic copy, and glowing neon gradients, we
+                            choose restraint. We choose structure. We treat pixels like concrete blocks and typography
+                            like monuments. Every line of code is handwritten; every layout is structurally intentional.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. SERVICES BENTO GRID -->
+        <section class="services" id="services">
+            <div class="container">
+                <div class="services-header">
+                    <div>
+                        <div class="section-label">02 / EXPERTISE</div>
+                        <h2 class="section-heading scramble-text" data-scramble="Selected Capabilities">Selected
+                            Capabilities</h2>
+                    </div>
+                    <p class="services-header-desc">
+                        A highly focused ecosystem of services engineered to automate operations, elevate digital
+                        presence, and build premium brand equity.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+                    <!-- Service 1: Website Development (Featured - Spans 2 Columns) -->
+                    <div class="service-card card-large" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                                        <path d="M6 21h12M12 17v4M6 8l-2 2 2 2M18 8l2 2-2 2" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">01</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Next.js • React • Webflow</span>
+                                <h3 class="service-title">Website Development</h3>
+                                <p class="service-desc">We design and develop architectural, ultra-fast web systems
+                                    engineered to load in milliseconds and behave with absolute fluidity.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Request Architecture</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 2: AI Chatbots (Medium) -->
+                    <div class="service-card card-medium" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M8 12h8M12 8v8" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">02</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Powered by GPT-4</span>
+                                <h3 class="service-title">AI Chatbots</h3>
+                                <p class="service-desc">Context-aware conversational engines programmed to handle
+                                    support, lead generation, and workflow routing with precision.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Configure Agent</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 3: Automation Systems (Medium) -->
+                    <div class="service-card card-medium" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <path d="M4 4h16v16H4zM4 12h16M12 4v16" />
+                                        <circle cx="12" cy="12" r="2" fill="currentColor" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">03</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Zapier • Make • n8n</span>
+                                <h3 class="service-title">Automation Systems</h3>
+                                <p class="service-desc">We build autonomous backend pipelines that synchronize your
+                                    CRMs, notification systems, and databases silently.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Integrate Stack</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 4: Branding & Graphics (Small) -->
+                    <div class="service-card card-small" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">04</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Corporate Identity</span>
+                                <h3 class="service-title">Branding & Graphics</h3>
+                                <p class="service-desc">Structured typographical systems, logos, and high-fashion style
+                                    guides crafted for maximum prestige.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Define Brand</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 5: Thumbnail Design (Small) -->
+                    <div class="service-card card-small" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <path d="M21 15l-5-5L5 21" />
+                                        <circle cx="9" cy="9" r="2" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">05</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Editorial Covers</span>
+                                <h3 class="service-title">Thumbnail Design</h3>
+                                <p class="service-desc">We design Youtube and digital publication covers that treat
+                                    digital real estate with the gravity of luxury print magazine covers.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Design Assets</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 6: Social Media Creatives (Small) -->
+                    <div class="service-card card-small" data-magnetic-card>
+                        <div class="card-shimmer"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="service-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                                    </svg>
+                                </div>
+                                <span class="service-num">06</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="service-tag">Curated Feeds</span>
+                                <h3 class="service-title">Social Media Creatives</h3>
+                                <p class="service-desc">Stark, high-contrast, editorial graphic campaigns tailored for
+                                    premium brand awareness and audience interaction.</p>
+                            </div>
+                            <div class="card-footer">
+                                <span class="card-cta-text">Curate Feed</span>
+                                <div class="card-arrow">
+                                    <svg viewBox="0 0 14 14" fill="none">
+                                        <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. DYNAMIC COST ESTIMATOR -->
+        <section class="estimator-section" id="estimator">
+            <div class="container">
+                <div class="section-label">03 / CONFIGURATOR</div>
+                <h2 class="section-heading scramble-text" data-scramble="Interactive Cost Estimator">Interactive Cost
+                    Estimator</h2>
+
+                <div class="estimator-container">
+                    <div class="estimator-left">
+                        <p class="estimator-instructions">Select your desired digital components to dynamically
+                            calculate development timeline and infrastructure investment level.</p>
+
+                        <div class="selector-group">
+                            <span class="group-title">Services</span>
+                            <div class="services-selector-grid">
+                                <div class="select-pill active" data-service="web" data-cost="499" data-time="4">
+                                    <span class="select-check">✓</span> Web Development
+                                </div>
+                                <div class="select-pill" data-service="ai" data-cost="299" data-time="3">
+                                    <span class="select-check">✓</span> AI Chatbots
+                                </div>
+                                <div class="select-pill" data-service="auto" data-cost="399" data-time="3">
+                                    <span class="select-check">✓</span> Automation Systems
+                                </div>
+                                <div class="select-pill" data-service="brand" data-cost="199" data-time="2">
+                                    <span class="select-check">✓</span> Branding & Graphics
+                                </div>
+                                <div class="select-pill" data-service="thumb" data-cost="49" data-time="1">
+                                    <span class="select-check">✓</span> Thumbnail Design
+                                </div>
+                                <div class="select-pill" data-service="social" data-cost="149" data-time="2">
+                                    <span class="select-check">✓</span> Social Media Creatives
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="group-title">Scale / Complexity</span>
+                                <span class="slider-value" id="complexity-label">Standard Infrastructure</span>
+                            </div>
+                            <input type="range" min="1" max="3" value="1" step="1" class="luxury-slider"
+                                id="complexity-slider">
+                            <div class="slider-labels">
+                                <span>Bespoke Core</span>
+                                <span>Multi-Integration</span>
+                                <span>Enterprise Architecture</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="estimator-right">
+                        <div class="estimator-card">
+                            <div class="est-tag">ESTIMATED PARAMETERS</div>
+
+                            <div class="metric-block">
+                                <span class="metric-label">TIMELINE TO RELEASE</span>
+                                <div class="metric-value">
+                                    <span id="est-time">04</span> <span class="metric-unit">Weeks</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-block">
+                                <span class="metric-label">INVESTMENT ESTIMATE</span>
+                                <div class="metric-value">
+                                    <span class="currency">$</span><span id="est-cost">499</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-notes">
+                                <p>* This is an architectural projection based on our standard sprint capacity. A exact
+                                    technical validation will be performed during our discovery workshop.</p>
+                            </div>
+
+                            <a href="#contact" class="btn btn-primary btn-full-width" id="btn-lock-estimate"
+                                data-magnetic>
+                                <span class="btn-text">Lock Estimate & Connect</span>
+                                <div class="btn-bg-fill"></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. WHY US / ANTI-AI PHILOSOPHY -->
+        <section class="philosophy-comparison" id="why-us">
+            <div class="container">
+                <div class="section-label">04 / ALIGNMENT</div>
+                <div class="philosophy-comparison-grid">
+                    <div class="pc-left">
+                        <h2 class="section-heading title-light scramble-text"
+                            data-scramble="The Anti-AI Design Philosophy">The Anti-AI Philosophy</h2>
+                        <p class="pc-sub">We refuse the low-friction route. Standard templates are built to be
+                            forgotten. We engineer systems designed to endure.</p>
+                        <div class="canvas-blueprint-container">
+                            <canvas id="blueprint-canvas"></canvas>
+                            <span class="bp-watermark">DREAMERS DESIGN INFRASTRUCTURE SYSTEM</span>
+                        </div>
+                    </div>
+                    <div class="pc-right">
+                        <div class="comparison-table">
+                            <div class="comp-row comp-header">
+                                <span>DIFFERENTIATORS</span>
+                                <span>STANDARD AGENCIES</span>
+                                <span>DREAMERS DESIGNS</span>
+                            </div>
+                            <div class="comp-row">
+                                <span class="comp-feature">Design Process</span>
+                                <span class="comp-bad">AI generation tools, templated grids</span>
+                                <span class="comp-good">Mathematical grid systems, bespoke layout</span>
+                            </div>
+                            <div class="comp-row">
+                                <span class="comp-feature">Visual System</span>
+                                <span class="comp-bad">Neon gradients, glowing spheres</span>
+                                <span class="comp-good">Stark gallery white, premium typography</span>
+                            </div>
+                            <div class="comp-row">
+                                <span class="comp-feature">Code Quality</span>
+                                <span class="comp-bad">Bloated plugins, generic page-builders</span>
+                                <span class="comp-good">Clean semantic code, zero-dependency engine</span>
+                            </div>
+                            <div class="comp-row">
+                                <span class="comp-feature">User Experience</span>
+                                <span class="comp-bad">Laggy scroll animations, cluttered blocks</span>
+                                <span class="comp-good">Butter-smooth Lenis inertia scrolling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. RESULTS / PROOF SECTION -->
+        <section class="results" id="results">
+            <div class="container">
+                <div class="section-label">05 / PROOF</div>
+                <h2 class="section-heading scramble-text" data-scramble="Quantitative Excellence">Quantitative
+                    Excellence</h2>
+
+                <div class="results-grid">
+                    <div class="result-box">
+                        <span class="result-number reveal-num" data-val="99.8">99.8%</span>
+                        <span class="result-tag">CLIENT RETENTION</span>
+                        <p class="result-desc">Long-term partnerships built on consistent infrastructure quality and
+                            meticulous engineering.</p>
+                    </div>
+                    <div class="result-box">
+                        <span class="result-number reveal-num" data-val="0.4">0.4s</span>
+                        <span class="result-tag">MEDIAN LOAD TIME</span>
+                        <p class="result-desc">Hyper-optimized assets, layouts, and server-side components loading in
+                            fractions of a second.</p>
+                    </div>
+                    <div class="result-box">
+                        <span class="result-number reveal-num" data-val="3.8">3.8x</span>
+                        <span class="result-tag">LEADS & CONVERSIONS</span>
+                        <p class="result-desc">Average conversion multiplier recorded across our website redesign
+                            portfolios.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. CONTACT SECTION -->
+        <section class="contact" id="contact">
+            <div class="container">
+                <div class="section-label">06 / START</div>
+
+                <div class="contact-wrapper">
+                    <div class="contact-left">
+                        <h2 class="contact-title scramble-text" data-scramble="Let's engineer your masterpiece.">Let's
+                            engineer <br>your masterpiece.</h2>
+                        <p class="contact-description">Reach out today. Our principal partners respond directly to set
+                            up a workshop within 24 hours.</p>
+
+                        <div class="studio-info">
+                            <div class="info-block">
+                                <span class="info-label">OFFICE LOCATION</span>
+                                <span class="info-val">Zürich, Switzerland</span>
+                            </div>
+                            <div class="info-block">
+                                <span class="info-label">INQUIRIES</span>
+                                <span class="info-val">studio@dreamersdesigns.com</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-right">
+                        <form id="contact-form" class="contact-form" action="https://formspree.io/f/xbdedvbq"
+                            method="POST" onsubmit="handleContactSubmit(event)">
+                            <div class="form-row">
+                                <div class="input-wrapper">
+                                    <input type="text" id="form-name" name="name" required placeholder=" ">
+                                    <label for="form-name">YOUR NAME</label>
+                                    <span class="input-bar"></span>
+                                </div>
+                                <div class="input-wrapper">
+                                    <input type="email" id="form-email" name="email" required placeholder=" ">
+                                    <label for="form-email">YOUR EMAIL</label>
+                                    <span class="input-bar"></span>
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="text" id="form-company" name="company" placeholder=" ">
+                                <label for="form-company">COMPANY OR INITIATIVE</label>
+                                <span class="input-bar"></span>
+                            </div>
+                            <div class="input-wrapper text-area-wrapper">
+                                <textarea id="form-message" name="message" required placeholder=" " rows="4"></textarea>
+                                <label for="form-message">PROJECT BRIEF / CONTEXT</label>
+                                <span class="input-bar"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-submit" data-magnetic>
+                                <span class="btn-text">Submit Brief</span>
+                                <div class="btn-bg-fill"></div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-top">
+                    <a href="#" class="footer-logo">DREAMERS DESIGNS</a>
+                    <div class="footer-nav">
+                        <a href="#services">Services</a>
+                        <a href="#philosophy">Philosophy</a>
+                        <a href="#estimator">Estimator</a>
+                        <a href="#results">Results</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="footer-clocks">
+                        <div class="clock"><span class="clock-label">ZH:</span> <span id="clock-zh">12:00:00</span>
+                        </div>
+                        <div class="clock"><span class="clock-label">LDN:</span> <span id="clock-ldn">11:00:00</span>
+                        </div>
+                        <div class="clock"><span class="clock-label">TYO:</span> <span id="clock-tyo">19:00:00</span>
+                        </div>
+                    </div>
+                    <div class="footer-meta">
+                        <span>© 2026 DREAMERS DESIGNS. ALL RIGHTS RESERVED.</span>
+                        <a href="#" class="scroll-top-btn" id="scroll-top" data-magnetic>BACK TO TOP ↑</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+
+</body>
+
+</html>

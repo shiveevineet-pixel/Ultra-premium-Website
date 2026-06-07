@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamers Designs — Client Portal</title>
+
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --text-tertiary: #a1a1aa;
+            --accent-primary: #09090b;
+            --accent-glow: rgba(9, 9, 11, 0.05);
+            --border-color: #e4e4e7;
+            --border-focus: #09090b;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(228, 228, 231, 0.6);
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --font-display: 'Syne', sans-serif;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ambient Background Grid & Blobs */
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+            background-color: #ffffff;
+        }
+
+        .ambient-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
+            opacity: 0.8;
+        }
+
+        .fluid-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0.85;
+            mix-blend-mode: multiply;
+        }
+
+        /* Glassmorphic Blob Overlays */
+        .g-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.45;
+            mix-blend-mode: multiply;
+            animation: float-blob 25s infinite alternate ease-in-out;
+        }
+
+        .g-blob-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0) 70%);
+            top: -10%;
+            left: -10%;
+        }
+
+        .g-blob-2 {
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(243, 232, 255, 0.8) 0%, rgba(216, 180, 254, 0) 70%);
+            bottom: -15%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .g-blob-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(254, 243, 199, 0.6) 0%, rgba(253, 230, 138, 0) 70%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes float-blob {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(50px, -70px) scale(1.15) rotate(120deg);
+            }
+
+            66% {
+                transform: translate(-40px, 30px) scale(0.9) rotate(240deg);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1) rotate(360deg);
+            }
+        }
+
+        /* App Container */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 750px;
+            margin: 20px;
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            box-shadow:
+                0 30px 70px rgba(0, 0, 0, 0.04),
+                0 10px 30px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            animation: card-appear 1.2s var(--ease-out-expo) forwards;
+        }
+
+        @keyframes card-appear {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Split Panels */
+        .visual-panel {
+            flex: 1.1;
+            position: relative;
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            overflow: hidden;
+        }
+
+        .form-panel {
+            flex: 0.9;
+            padding: 56px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Visual Panel Content */
+        .brand-container {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.3s forwards;
+        }
+
+        .brand-logo-svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--text-primary);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: draw-logo 2s ease forwards 0.5s;
+        }
+
+        @keyframes draw-logo {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .brand-name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+        }
+
+        .visual-showcase {
+            position: relative;
+            z-index: 5;
+            margin: auto 0;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.5s forwards;
+        }
+
+        .showcase-title {
+            font-family: var(--font-display);
+            font-size: 42px;
+            line-height: 1.15;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        .showcase-title span {
+            display: block;
+            background: linear-gradient(90deg, #09090b 30%, #71717a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .showcase-slider {
+            position: relative;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        .slider-item {
+            position: absolute;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            font-weight: 400;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--ease-out-expo);
+        }
+
+        .slider-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slider-item.exit {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .visual-footer {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.7s forwards;
+        }
+
+        .copyright {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .visual-interactive-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-primary);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .visual-interactive-dot::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 1px solid var(--text-primary);
+            border-radius: 50%;
+            animation: pulse-ring 2s infinite ease-out;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        /* Interactive Canvas for Art Background */
+        .showcase-canvas-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Form Panel Layout */
+        .form-header {
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.4s forwards;
+        }
+
+        .form-title {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Tab Switcher */
+        .tab-container {
+            display: flex;
+            position: relative;
+            background: #f4f4f5;
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 32px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.5s forwards;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+        }
+
+        .tab-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            bottom: 4px;
+            width: calc(50% - 4px);
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-container[data-active-tab="signup"] .tab-slider {
+            transform: translateX(100%);
+        }
+
+        /* Form Wrapper & Switch logic */
+        .forms-outer-wrapper {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s var(--ease-out-expo) 0.6s forwards;
+        }
+
+        .forms-inner-track {
+            display: flex;
+            width: 200%;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .auth-form-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: opacity 0.5s ease;
+        }
+
+        .auth-form-container.inactive {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Premium Floating Inputs */
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .floating-input {
+            width: 100%;
+            height: 56px;
+            background: rgba(244, 244, 245, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px 16px 6px 16px;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s var(--ease-out-expo);
+        }
+
+        .floating-input:focus {
+            background: #ffffff;
+            border-color: var(--border-focus);
+            box-shadow:
+                0 0 0 4px var(--accent-glow),
+                0 10px 20px rgba(0, 0, 0, 0.015);
+        }
+
+        /* Add padding right if password to avoid overlapping toggle */
+        .floating-input-password {
+            padding-right: 48px;
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: all 0.3s var(--ease-out-expo);
+            transform-origin: left top;
+        }
+
+        /* When focused or populated, float up */
+        .floating-input:focus~.floating-label,
+        .floating-input:not(:placeholder-shown)~.floating-label {
+            transform: translateY(-82%) scale(0.78);
+            color: var(--text-tertiary);
+            font-weight: 600;
+        }
+
+        /* Password Visibility Toggle */
+        .password-toggle-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            transition: color 0.2s, background-color 0.2s;
+            outline: none;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--text-primary);
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .password-toggle-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.8;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        /* Forgot Pass & Checkbox row */
+        .form-options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        /* Custom Checkbox */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .checkbox-input {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s var(--ease-out-expo);
+            background: #ffffff;
+        }
+
+        .checkbox-input:checked+.custom-checkbox {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .custom-checkbox svg {
+            width: 12px;
+            height: 12px;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-dasharray: 20;
+            stroke-dashoffset: 20;
+            transition: stroke-dashoffset 0.25s ease-in-out;
+        }
+
+        .checkbox-input:checked+.custom-checkbox svg {
+            stroke-dashoffset: 0;
+        }
+
+        .forgot-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .forgot-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--border-color);
+            transform: scaleX(1);
+            transform-origin: right;
+            transition: transform 0.35s var(--ease-out-expo), background-color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: var(--text-primary);
+        }
+
+        .forgot-link:hover::after {
+            transform: scaleX(0);
+            background-color: var(--text-primary);
+        }
+
+        /* Premium Buttons */
+        .submit-btn {
+            position: relative;
+            width: 100%;
+            height: 56px;
+            background: var(--accent-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.35s var(--ease-out-expo);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.15);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Shiny Overlay Effect */
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.15),
+                    transparent);
+            transform: skewX(-20deg);
+            transition: 0.75s;
+        }
+
+        .submit-btn:hover::before {
+            left: 150%;
+        }
+
+        .btn-text {
+            transition: transform 0.4s var(--ease-out-expo), opacity 0.3s;
+        }
+
+        /* Loading Spinner */
+        .btn-spinner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s var(--ease-out-expo);
+            pointer-events: none;
+        }
+
+        /* Success Check */
+        .btn-success-icon {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s var(--ease-out-expo);
+            pointer-events: none;
+        }
+
+        .btn-success-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+        }
+
+        /* Button Loading / Success States */
+        .submit-btn.loading {
+            pointer-events: none;
+            background: #27272a;
+        }
+
+        .submit-btn.loading .btn-text {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        .submit-btn.loading .btn-spinner {
+            opacity: 1;
+            transform: scale(1);
+            animation: spin 0.8s linear infinite;
+        }
+
+        .submit-btn.success {
+            background: var(--success-color);
+            pointer-events: none;
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.25);
+        }
+
+        .submit-btn.success .btn-text,
+        .submit-btn.success .btn-spinner {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        .submit-btn.success .btn-success-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .submit-btn.success .btn-success-icon svg {
+            animation: draw-check 0.4s ease forwards 0.2s;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes draw-check {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Social Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            margin: 8px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 16px;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 16px;
+        }
+
+        /* Social Buttons Grid */
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .social-btn {
+            height: 52px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+            outline: none;
+        }
+
+        .social-btn:hover {
+            border-color: var(--text-primary);
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .social-btn:active {
+            transform: translateY(0);
+        }
+
+        .social-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Dynamic Error/Notice Toast */
+        .toast-notification {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translate(-50%, 20px);
+            background: #09090b;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s var(--ease-out-expo);
+            z-index: 100;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .toast-notification svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Staggered Entry Keyframes */
+        @keyframes fade-in-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .app-container {
+                min-height: auto;
+                max-width: 500px;
+                flex-direction: column;
+                border-radius: 24px;
+            }
+
+            .visual-panel {
+                display: none;
+                /* Hide visual pane on tablet/mobile for pure focus on login form */
+            }
+
+            .form-panel {
+                flex: 1;
+                padding: 48px 36px;
+                background: #ffffff;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-panel {
+                padding: 36px 24px;
+            }
+
+            .form-title {
+                font-size: 28px;
+            }
+
+            .social-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .form-options-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Ambient Grid & Fluid Background effects -->
+    <div class="ambient-bg">
+        <div class="ambient-grid"></div>
+        <canvas class="fluid-canvas" id="ambientCanvas"></canvas>
+        <div class="g-blob g-blob-1"></div>
+        <div class="g-blob g-blob-2"></div>
+        <div class="g-blob g-blob-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="app-container" id="tiltContainer">
+
+        <!-- Left Visual Showcase Panel -->
+        <section class="visual-panel">
+            <canvas class="showcase-canvas-bg" id="showcaseCanvas"></canvas>
+
+            <div class="brand-container">
+                <svg class="brand-logo-svg" viewBox="0 0 100 100">
+                    <path d="M30,15 L30,85 Q70,85 70,50 Q70,15 30,15 Z" />
+                    <circle cx="48" cy="50" r="8" />
+                </svg>
+                <span class="brand-name">DREAMERS DESIGNS</span>
+            </div>
+
+            <div class="visual-showcase">
+                <h2 class="showcase-title">
+                    <span>Engineering digital</span>
+                    <span>masterpieces.</span>
+                </h2>
+                <div class="showcase-slider">
+                    <div class="slider-item active">AI-powered chatbots, bespoke websites, and intelligent automation
+                        systems for visionary brands.</div>
+                    <div class="slider-item">Premium branding, thumbnail design, and social media creatives engineered
+                        to perfection.</div>
+                    <div class="slider-item">From Next.js architectures to GPT-4 integrations — we build what others
+                        can't imagine.</div>
+                </div>
+            </div>
+
+            <div class="visual-footer">
+                <span class="copyright">© 2026 Dreamers Designs.</span>
+                <div class="visual-interactive-dot"></div>
+            </div>
+        </section>
+
+        <!-- Right Authentication Form Panel -->
+        <section class="form-panel">
+
+            <!-- Form Header -->
+            <div class="form-header">
+                <h1 class="form-title" id="formMainTitle">Welcome Back</h1>
+                <p class="form-subtitle" id="formMainSubtitle">Sign in to access your Dreamers Designs dashboard.</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="tab-container" id="authTabs" data-active-tab="login">
+                <div class="tab-slider"></div>
+                <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+                <button class="tab-btn" onclick="switchTab('signup')">Register</button>
+            </div>
+
+            <!-- Forms Wrapper -->
+            <div class="forms-outer-wrapper">
+                <div class="forms-inner-track" id="formsTrack">
+
+                    <!-- Login Form -->
+                    <form class="auth-form-container" id="loginForm" onsubmit="handleFormSubmit(event, 'login')">
+                        <!-- Floating Input -->
+                        <div class="input-wrapper">
+                            <input type="email" id="loginEmail" class="floating-input" placeholder=" " required
+                                autocomplete="username">
+                            <label for="loginEmail" class="floating-label">Email Address</label>
+                        </div>
+
+                        <!-- Floating Input Password -->
+                        <div class="input-wrapper">
+                            <input type="password" id="loginPassword" class="floating-input floating-input-password"
+                                placeholder=" " required autocomplete="current-password">
+                            <label for="loginPassword" class="floating-label">Password</label>
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordVisibility('loginPassword')"
+                                aria-label="Toggle Password Visibility">
+                                <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Checkbox & Link options -->
+                        <div class="form-options-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="checkbox-input">
+                                <span class="custom-checkbox">
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </span>
+                                <span>Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-link">Forgot password?</a>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="submit-btn">
+                            <span class="btn-text">Authenticate</span>
+                            <div class="btn-spinner"></div>
+                            <div class="btn-success-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form class="auth-form-container inactive" id="registerForm"
+                        onsubmit="handleFormSubmit(event, 'signup')">
+                        <!-- Name -->
+                        <div class="input-wrapper">
+                            <input type="text" id="registerName" class="floating-input" placeholder=" " required
+                                autocomplete="name">
+                            <label for="registerName" class="floating-label">Full Name</label>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="input-wrapper">
+                            <input type="email" id="registerEmail" class="floating-input" placeholder=" " required
+                                autocomplete="username">
+                            <label for="registerEmail" class="floating-label">Email Address</label>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="input-wrapper">
+                            <input type="password" id="registerPassword" class="floating-input floating-input-password"
+                                placeholder=" " required autocomplete="new-password">
+                            <label for="registerPassword" class="floating-label">Password</label>
+                            <button type="button" class="password-toggle-btn"
+                                onclick="togglePasswordVisibility('registerPassword')"
+                                aria-label="Toggle Password Visibility">
+                                <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Terms Checkbox -->
+                        <div class="form-options-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="checkbox-input" required>
+                                <span class="custom-checkbox">
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </span>
+                                <span>I agree to the Dreamers Designs Terms of Service</span>
+                            </label>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="submit-btn">
+                            <span class="btn-text">Create Account</span>
+                            <div class="btn-spinner"></div>
+                            <div class="btn-success-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Third-party Divider -->
+            <div class="divider">or continue with</div>
+
+            <!-- Social logins -->
+            <div class="social-grid">
+                <!-- Google -->
+                <button type="button" class="social-btn" onclick="handleGoogleLogin()"
+                    aria-label="Continue with Google">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="#ea4335"
+                            d="M12 5.04c1.62 0 3.08.56 4.22 1.66l3.15-3.15C17.45 1.8 14.94 1 12 1 7.37 1 3.42 3.65 1.5 7.5l3.86 3C6.27 7.74 8.9 5.04 12 5.04z" />
+                        <path fill="#4285f4"
+                            d="M23.5 12.25c0-.82-.07-1.6-.22-2.35H12v4.45h6.47c-.28 1.47-1.1 2.72-2.35 3.56l3.65 2.83c2.14-1.97 3.73-4.88 3.73-8.49z" />
+                        <path fill="#fbbc05"
+                            d="M5.36 14.5c-.24-.72-.38-1.49-.38-2.3s.14-1.58.38-2.3L1.5 6.9c-.9 1.8-1.5 4.01-1.5 5.1s.6 3.3 1.5 5.1l3.86-3z" />
+                        <path fill="#34a853"
+                            d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.65-2.83c-1.02.68-2.33 1.09-4.31 1.09-3.1 0-5.73-2.7-6.64-5.46L1.5 15.9C3.42 19.75 7.37 23 12 23z" />
+                    </svg>
+                </button>
+                <!-- Apple -->
+                <button type="button" class="social-btn" onclick="handleSocialLogin('Apple')"
+                    aria-label="Continue with Apple">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.51-.62.73-1.16 1.87-1.02 2.98 1.11.09 2.24-.59 2.95-1.43z" />
+                    </svg>
+                </button>
+                <!-- GitHub -->
+                <button type="button" class="social-btn" onclick="handleSocialLogin('GitHub')"
+                    aria-label="Continue with GitHub">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                    </svg>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Toast Component -->
+    <div class="toast-notification" id="toast">
+        <svg viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="toastMessage">Verification failed.</span>
+    </div>
+
+    <!-- Interactive Scripts -->
+    <script>
+        // Form & Tab State
+        let currentTab = 'login';
+
+        function switchTab(tab) {
+            if (currentTab === tab) return;
+            currentTab = tab;
+
+            const authTabs = document.getElementById('authTabs');
+            const formsTrack = document.getElementById('formsTrack');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const formMainTitle = document.getElementById('formMainTitle');
+            const formMainSubtitle = document.getElementById('formMainSubtitle');
+
+            authTabs.setAttribute('data-active-tab', tab);
+
+            const tabButtons = authTabs.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                if (btn.textContent.trim().toLowerCase().includes(tab === 'login' ? 'in' : 'register')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (tab === 'login') {
+                formsTrack.style.transform = 'translateX(0%)';
+                loginForm.classList.remove('inactive');
+                registerForm.classList.add('inactive');
+                formMainTitle.textContent = "Welcome Back";
+                formMainSubtitle.textContent = "Sign in to access your Dreamers Designs dashboard.";
+            } else {
+                formsTrack.style.transform = 'translateX(-50%)';
+                loginForm.classList.add('inactive');
+                registerForm.classList.remove('inactive');
+                formMainTitle.textContent = "Create Account";
+                formMainSubtitle.textContent = "Join Dreamers Designs to access premium digital services.";
+            }
+        }
+
+        // Toggle Password Input Visibility
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input.nextElementSibling.nextElementSibling; // button is after label
+            const icon = btn.querySelector('svg');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                `;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                `;
+            }
+        }
+        // SUPABASE CONFIG
+        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Form Submit Handler (Supabase auth)
+        async function handleFormSubmit(event, formType) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.classList.add('loading');
+
+            if (formType === 'login') {
+                const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+                const password = document.getElementById('loginPassword').value;
+
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+                submitBtn.classList.remove('loading');
+                if (error) { showToast(error.message, 'error'); return; }
+
+                submitBtn.classList.add('success');
+                showToast('Session established. Redirecting...', 'success');
+                setTimeout(() => { triggerRedirect(); }, 1200);
+
+            } else {
+                const name = document.getElementById('registerName').value.trim();
+                const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+                const password = document.getElementById('registerPassword').value;
+
+                if (!name || !email || !password) {
+                    submitBtn.classList.remove('loading');
+                    showToast('All fields are required.', 'error');
+                    return;
+                }
+
+                const { data, error } = await _supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name } }
+                });
+
+                submitBtn.classList.remove('loading');
+                if (error) { showToast(error.message, 'error'); return; }
+
+                submitBtn.classList.add('success');
+                showToast('Account created! Welcome to Dreamers Designs.', 'success');
+                setTimeout(() => { triggerRedirect(); }, 1200);
+            }
+        }
+
+        async function triggerRedirect() {
+            let target = sessionStorage.getItem('redirectAfterLogin') || '../index.html';
+            if (target.startsWith('index.html')) target = '../' + target;
+            sessionStorage.removeItem('redirectAfterLogin');
+            // Wait for session to be saved before redirecting
+            await new Promise(resolve => setTimeout(resolve, 800));
+            window.location.href = target;
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastSvg = toast.querySelector('svg');
+
+            toastMsg.textContent = message;
+
+            if (type === 'success') {
+                toast.style.background = '#10b981';
+                toastSvg.innerHTML = `
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                `;
+            } else {
+                toast.style.background = '#ef4444';
+                toastSvg.innerHTML = `
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                `;
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        // Social Logins
+        async function handleGoogleLogin() {
+            const { error } = await _supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/index.html'
+                }
+            });
+            if (error) showToast(error.message, 'error');
+        }
+
+        function handleSocialLogin(provider) {
+            showToast(`${provider} authentication coming soon to Dreamers Designs.`, 'success');
+        }
+
+        // --- Premium Showcase Text Slider ---
+        const sliderItems = document.querySelectorAll('.slider-item');
+        let activeSlideIdx = 0;
+
+        setInterval(() => {
+            const currentSlide = sliderItems[activeSlideIdx];
+            currentSlide.classList.remove('active');
+            currentSlide.classList.add('exit');
+
+            setTimeout(() => {
+                currentSlide.classList.remove('exit');
+            }, 600);
+
+            activeSlideIdx = (activeSlideIdx + 1) % sliderItems.length;
+            sliderItems[activeSlideIdx].classList.add('active');
+        }, 5000);
+
+        // --- 3D Parallax Tilt Effect for Container ---
+        const container = document.getElementById('tiltContainer');
+        const isMobile = window.innerWidth <= 992;
+
+        if (!isMobile) {
+            document.addEventListener('mousemove', (e) => {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 45;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 45;
+                container.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            });
+
+            document.addEventListener('mouseenter', () => {
+                container.style.transition = 'none';
+            });
+
+            document.addEventListener('mouseleave', () => {
+                container.style.transition = 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+                container.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            });
+        }
+
+        // --- Ambient Background & Interactive Canvas ---
+        const ambientCanvas = document.getElementById('ambientCanvas');
+        const actx = ambientCanvas.getContext('2d');
+
+        let awidth = ambientCanvas.width = window.innerWidth;
+        let aheight = ambientCanvas.height = window.innerHeight;
+
+        const mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('resize', () => {
+            awidth = ambientCanvas.width = window.innerWidth;
+            aheight = ambientCanvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        class AmbientParticle {
+            constructor() {
+                this.x = Math.random() * awidth;
+                this.y = Math.random() * aheight;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 12;
+                this.opacity = Math.random() * 0.4 + 0.15;
+            }
+
+            draw() {
+                actx.fillStyle = `rgba(9, 9, 11, ${this.opacity})`;
+                actx.beginPath();
+                actx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                actx.closePath();
+                actx.fill();
+            }
+
+            update() {
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+
+                if (distance < mouse.radius) {
+                    let force = (mouse.radius - distance) / mouse.radius;
+                    let directionX = forceDirectionX * force * this.density;
+                    let directionY = forceDirectionY * force * this.density;
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    if (this.x !== this.baseX) {
+                        let dxBack = this.x - this.baseX;
+                        this.x -= dxBack / 15;
+                    }
+                    if (this.y !== this.baseY) {
+                        let dyBack = this.y - this.baseY;
+                        this.y -= dyBack / 15;
+                    }
+                }
+            }
+        }
+
+        let particlesArray = [];
+        function initParticles() {
+            particlesArray = [];
+            const numberOfParticles = (awidth * aheight) / 11000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new AmbientParticle());
+            }
+        }
+
+        function animateAmbient() {
+            actx.clearRect(0, 0, awidth, aheight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].draw();
+                particlesArray[i].update();
+            }
+            requestAnimationFrame(animateAmbient);
+        }
+
+        initParticles();
+        animateAmbient();
+
+        // --- Visual Showcase Interactive Canvas (Floating Wave Lines) ---
+        const showcaseCanvas = document.getElementById('showcaseCanvas');
+        const sctx = showcaseCanvas.getContext('2d');
+
+        let swidth = showcaseCanvas.width = showcaseCanvas.parentElement.offsetWidth;
+        let sheight = showcaseCanvas.height = showcaseCanvas.parentElement.offsetHeight;
+
+        window.addEventListener('resize', () => {
+            if (showcaseCanvas.parentElement) {
+                swidth = showcaseCanvas.width = showcaseCanvas.parentElement.offsetWidth;
+                sheight = showcaseCanvas.height = showcaseCanvas.parentElement.offsetHeight;
+            }
+        });
+
+        let lineOffset = 0;
+        function animateShowcaseCanvas() {
+            sctx.clearRect(0, 0, swidth, sheight);
+
+            sctx.strokeStyle = 'rgba(9, 9, 11, 0.04)';
+            sctx.lineWidth = 1.5;
+
+            for (let j = 0; j < 3; j++) {
+                sctx.beginPath();
+                for (let i = 0; i < swidth; i++) {
+                    const amplitude = 30 + j * 10;
+                    const frequency = 0.003 + j * 0.001;
+                    const y = (sheight / 2) + Math.sin(i * frequency + lineOffset + j) * amplitude;
+                    if (i === 0) {
+                        sctx.moveTo(i, y);
+                    } else {
+                        sctx.lineTo(i, y);
+                    }
+                }
+                sctx.stroke();
+            }
+
+            lineOffset += 0.006;
+            requestAnimationFrame(animateShowcaseCanvas);
+        }
+        animateShowcaseCanvas();
+
+    </script>
+</body>
+
+</html>
