@@ -1540,6 +1540,8 @@ body.hovering-interactive .cursor-dot {
 
     .menu-toggle {
         display: flex;
+        position: relative;
+        z-index: 10001;
     }
 
     /* Mobile Menu Dropdown Active */
@@ -1554,8 +1556,9 @@ body.hovering-interactive .cursor-dot {
         width: 100vw;
         height: 100vh;
         background-color: var(--color-bg);
-        z-index: 9995;
+        z-index: 10000;
         padding: 100px 20px 40px;
+        pointer-events: auto;
     }
 
     .mobile-menu-links {

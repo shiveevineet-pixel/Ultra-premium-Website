@@ -843,12 +843,13 @@ function initPageTransitions() {
         });
     }
 
-    // Fix mobile nav link clicks
+    // Fix mobile nav link clicks — use 'click' for universal mobile/desktop support
     const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
     mobileNavLinks.forEach(link => {
-        link.addEventListener('touchend', (e) => {
-            e.preventDefault();
+        link.addEventListener('click', (e) => {
             const target = link.getAttribute('href');
+            e.preventDefault();
+            e.stopPropagation();
             if (menu) menu.classList.remove('active');
             if (toggle) toggle.classList.remove('active');
             if (target && target.startsWith('#')) {
@@ -856,13 +857,35 @@ function initPageTransitions() {
                 if (targetEl && lenis) {
                     setTimeout(() => {
                         lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
-                    }, 300);
+                    }, 350);
                 }
             } else if (target) {
-                setTimeout(() => { window.location.href = target; }, 300);
+                setTimeout(() => { window.location.href = target; }, 350);
             }
         });
     });
+
+    // Fix mobile CTA button click
+    const mobileCta = document.querySelector('.mobile-menu-cta');
+    if (mobileCta) {
+        mobileCta.addEventListener('click', (e) => {
+            const target = mobileCta.getAttribute('href');
+            e.preventDefault();
+            e.stopPropagation();
+            if (menu) menu.classList.remove('active');
+            if (toggle) toggle.classList.remove('active');
+            if (target && target.startsWith('#')) {
+                const targetEl = document.querySelector(target);
+                if (targetEl && lenis) {
+                    setTimeout(() => {
+                        lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+                    }, 350);
+                }
+            } else if (target) {
+                setTimeout(() => { window.location.href = target; }, 350);
+            }
+        });
+    }
 }
 
 /* 12. CLIENT-SIDE AUTHENTICATION SESSION SYSTEM */
