@@ -225,7 +225,8 @@ function initThreeRibbon() {
     try {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: false });
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
     } catch (e) {
         webglSupported = false;
         console.warn("WebGL not supported. Running 2D Canvas fallback.");
@@ -236,7 +237,8 @@ function initThreeRibbon() {
         return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     // Parametric plane geometry
