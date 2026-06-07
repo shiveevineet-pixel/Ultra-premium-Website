@@ -987,7 +987,7 @@ function initBookingGuard() {
         if (!trigger) return;
 
         trigger.addEventListener('click', (e) => {
-            const currentUser = localStorage.getItem('currentUser');
+            const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('sb-session');
             if (!currentUser) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1021,7 +1021,7 @@ function initBookingGuard() {
 
     // Handle post-redirect actions if redirected from login
     const redirectTarget = sessionStorage.getItem('redirectAfterLogin');
-    const currentUser = localStorage.getItem('currentUser');
+    const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('sb-session');
 
     if (currentUser && redirectTarget) {
         sessionStorage.removeItem('redirectAfterLogin');
