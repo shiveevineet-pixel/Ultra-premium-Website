@@ -869,10 +869,13 @@ function initMobileMenu() {
 
 /* 12. LIQUID WAVE DESKTOP PAGE TRANSITIONS */
 function initPageTransitions() {
-    const navLinks = document.querySelectorAll('.nav-link, .nav-cta, .footer-nav a, .scroll-top-btn');
+    const navLinks = document.querySelectorAll('.nav-link, .nav-cta, .mobile-nav-link, .footer-nav a, .scroll-top-btn');
     const path = document.querySelector('.transition-path');
 
     if (!path) return;
+
+    // Force reset path on load in case it got stuck
+    gsap.set(path, { attr: { d: 'M 0 100 V 100 Q 50 100 100 100 V 100 Z' } });
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
