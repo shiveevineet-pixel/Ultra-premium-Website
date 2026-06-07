@@ -788,9 +788,73 @@ function initScrollReveals() {
 
 /* 11. LIQUID WAVE CANVAS PAGE TRANSITIONS */
 function initPageTransitions() {
-    const navLinks = document.querySelectorAll('.nav-link, .nav-cta, .mobile-nav-link, .footer-nav a, .scroll-top-btn');
+    // IMPORTANT: Do NOT include .mobile-nav-link here — they have their own handler below
+    const navLinks = document.querySelectorAll('.nav-link, .nav-cta, .footer-nav a, .scroll-top-btn');
     const path = document.querySelector('.transition-path');
 
+    // Mobile Menu Button interaction — set up FIRST, before the path check
+    const toggle = document.getElementById('menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    if (toggle && menu) {
+        toggle.addEventListener('click', () => {
+            menu.classList.toggle('active');
+            toggle.classList.toggle('active');
+        });
+    }
+
+    // Mobile nav link clicks — these work independently of the transition path
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const target = link.getAttribute('href');
+            if (menu) menu.classList.remove('active');
+            if (toggle) toggle.classList.remove('active');
+            if (target && target.startsWith('#')) {
+                const targetEl = document.querySelector(target);
+                if (targetEl) {
+                    setTimeout(() => {
+                        if (lenis) {
+                            lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+                        } else {
+                            targetEl.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 350);
+                }
+            } else if (target) {
+                setTimeout(() => { window.location.href = target; }, 350);
+            }
+        });
+    });
+
+    // Mobile CTA button click
+    const mobileCta = document.querySelector('.mobile-menu-cta');
+    if (mobileCta) {
+        mobileCta.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const target = mobileCta.getAttribute('href');
+            if (menu) menu.classList.remove('active');
+            if (toggle) toggle.classList.remove('active');
+            if (target && target.startsWith('#')) {
+                const targetEl = document.querySelector(target);
+                if (targetEl) {
+                    setTimeout(() => {
+                        if (lenis) {
+                            lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+                        } else {
+                            targetEl.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 350);
+                }
+            } else if (target) {
+                setTimeout(() => { window.location.href = target; }, 350);
+            }
+        });
+    }
+
+    // Desktop nav link transitions (liquid wave animation)
     if (!path) return;
 
     navLinks.forEach(link => {
@@ -800,8 +864,7 @@ function initPageTransitions() {
                 e.preventDefault();
 
                 // Close mobile navigation if active
-                const mobileMenu = document.getElementById('mobile-menu');
-                if (mobileMenu) mobileMenu.classList.remove('active');
+                if (menu) menu.classList.remove('active');
 
                 // Trigger liquid wave timeline
                 const tl = gsap.timeline();
@@ -832,60 +895,6 @@ function initPageTransitions() {
             }
         });
     });
-
-    // Mobile Menu Button interaction
-    const toggle = document.getElementById('menu-toggle');
-    const menu = document.getElementById('mobile-menu');
-    if (toggle && menu) {
-        toggle.addEventListener('click', () => {
-            menu.classList.toggle('active');
-            toggle.classList.toggle('active');
-        });
-    }
-
-    // Fix mobile nav link clicks — use 'click' for universal mobile/desktop support
-    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const target = link.getAttribute('href');
-            e.preventDefault();
-            e.stopPropagation();
-            if (menu) menu.classList.remove('active');
-            if (toggle) toggle.classList.remove('active');
-            if (target && target.startsWith('#')) {
-                const targetEl = document.querySelector(target);
-                if (targetEl && lenis) {
-                    setTimeout(() => {
-                        lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
-                    }, 350);
-                }
-            } else if (target) {
-                setTimeout(() => { window.location.href = target; }, 350);
-            }
-        });
-    });
-
-    // Fix mobile CTA button click
-    const mobileCta = document.querySelector('.mobile-menu-cta');
-    if (mobileCta) {
-        mobileCta.addEventListener('click', (e) => {
-            const target = mobileCta.getAttribute('href');
-            e.preventDefault();
-            e.stopPropagation();
-            if (menu) menu.classList.remove('active');
-            if (toggle) toggle.classList.remove('active');
-            if (target && target.startsWith('#')) {
-                const targetEl = document.querySelector(target);
-                if (targetEl && lenis) {
-                    setTimeout(() => {
-                        lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
-                    }, 350);
-                }
-            } else if (target) {
-                setTimeout(() => { window.location.href = target; }, 350);
-            }
-        });
-    }
 }
 
 /* 12. CLIENT-SIDE AUTHENTICATION SESSION SYSTEM */
