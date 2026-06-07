@@ -451,6 +451,9 @@ body.hovering-interactive .cursor-dot {
     height: 100%;
     z-index: 1;
     overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    isolation: isolate;
 }
 
 #hero-canvas {
@@ -458,7 +461,11 @@ body.hovering-interactive .cursor-dot {
     height: 100%;
     display: block;
     mix-blend-mode: multiply;
-    /* Ensures beautiful blend on white canvas */
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .hero-canvas-label {
