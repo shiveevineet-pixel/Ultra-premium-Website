@@ -13,21 +13,21 @@
     --color-border-hover: rgba(10, 10, 10, 0.15);
     --color-accent: #0A0A0A;
     --color-accent-subtle: #F2F2F0;
-    
+
     /* Typography */
     --font-serif: 'Instrument Serif', Georgia, serif;
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'Space Grotesk', 'Courier New', monospace;
-    
+
     /* Layout Spacing */
     --container-width: 1400px;
     --section-padding: 180px 0;
-    
+
     /* Animations & Transitions */
     --transition-smooth: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-fast: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-magnetic: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    
+
     /* Shadows */
     --shadow-subtle: 0 10px 40px -15px rgba(0, 0, 0, 0.03);
     --shadow-hover: 0 30px 60px -25px rgba(0, 0, 0, 0.08);
@@ -40,14 +40,16 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    scroll-behavior: auto; /* Managed by Lenis */
+    scroll-behavior: auto;
+    /* Managed by Lenis */
 }
 
 /* Custom Selection */
@@ -63,10 +65,13 @@ body.preloader-active {
 a {
     color: inherit;
     text-decoration: none;
-    cursor: none; /* Let Custom Cursor Take Over */
+    cursor: none;
+    /* Let Custom Cursor Take Over */
 }
 
-button, input, textarea {
+button,
+input,
+textarea {
     font-family: inherit;
     color: inherit;
     background: none;
@@ -431,7 +436,8 @@ body.hovering-interactive .cursor-dot {
     width: 100%;
     height: 100%;
     display: block;
-    mix-blend-mode: multiply; /* Ensures beautiful blend on white canvas */
+    mix-blend-mode: multiply;
+    /* Ensures beautiful blend on white canvas */
 }
 
 .hero-canvas-label {
@@ -485,8 +491,15 @@ body.hovering-interactive .cursor-dot {
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(2.8); opacity: 0; }
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
 }
 
 .hero-wrapper {
@@ -662,9 +675,17 @@ body.hovering-interactive .cursor-dot {
 }
 
 @keyframes line-slide {
-    0% { left: -100%; }
-    50% { left: 100%; }
-    100% { left: 100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 
 /* 7. MANIFESTO SECTION */
@@ -792,7 +813,8 @@ body.hovering-interactive .cursor-dot {
     flex-direction: column;
     justify-content: space-between;
     pointer-events: none;
-    transform: translateZ(30px); /* Parallax pop out */
+    transform: translateZ(30px);
+    /* Parallax pop out */
 }
 
 /* Platinum Shimmer hover cover */
@@ -802,7 +824,7 @@ body.hovering-interactive .cursor-dot {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(226,226,226,0.12) 0%, rgba(245,245,247,0.2) 50%, rgba(184,184,184,0.12) 100%);
+    background: linear-gradient(135deg, rgba(226, 226, 226, 0.12) 0%, rgba(245, 245, 247, 0.2) 50%, rgba(184, 184, 184, 0.12) 100%);
     opacity: 0;
     transition: opacity 0.6s ease;
     pointer-events: none;
@@ -1351,10 +1373,10 @@ body.hovering-interactive .cursor-dot {
     transform-origin: left;
 }
 
-.input-wrapper input:focus ~ label,
-.input-wrapper input:not(:placeholder-shown) ~ label,
-.input-wrapper textarea:focus ~ label,
-.input-wrapper textarea:not(:placeholder-shown) ~ label {
+.input-wrapper input:focus~label,
+.input-wrapper input:not(:placeholder-shown)~label,
+.input-wrapper textarea:focus~label,
+.input-wrapper textarea:not(:placeholder-shown)~label {
     transform: translateY(-24px) scale(0.85);
     color: var(--color-text);
 }
@@ -1371,8 +1393,8 @@ body.hovering-interactive .cursor-dot {
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.input-wrapper input:focus ~ .input-bar,
-.input-wrapper textarea:focus ~ .input-bar {
+.input-wrapper input:focus~.input-bar,
+.input-wrapper textarea:focus~.input-bar {
     transform: scaleX(1);
 }
 
@@ -1460,37 +1482,37 @@ body.hovering-interactive .cursor-dot {
         font-size: 4.5rem;
         max-width: 95%;
     }
-    
+
     .manifesto-paragraph {
         font-size: 2.2rem;
     }
-    
+
     .services-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .card-large {
         grid-column: span 2;
     }
-    
+
     .card-medium {
         grid-column: span 1;
     }
-    
+
     .card-small {
         grid-column: span 1;
     }
-    
+
     .estimator-container {
         grid-template-columns: 1fr;
         gap: 60px;
     }
-    
+
     .estimator-right {
         position: relative;
         top: 0;
     }
-    
+
     .philosophy-comparison-grid {
         grid-template-columns: 1fr;
         gap: 60px;
@@ -1501,24 +1523,25 @@ body.hovering-interactive .cursor-dot {
     :root {
         --section-padding: 100px 0;
     }
-    
+
     .navbar-container {
         padding: 20px 20px 0;
     }
-    
+
     .navbar {
         height: 60px;
         padding: 0 20px;
     }
-    
-    .nav-links, .nav-cta {
+
+    .nav-links,
+    .nav-cta {
         display: none;
     }
-    
+
     .menu-toggle {
         display: flex;
     }
-    
+
     /* Mobile Menu Dropdown Active */
     .mobile-menu.active {
         display: flex;
@@ -1531,10 +1554,10 @@ body.hovering-interactive .cursor-dot {
         width: 100vw;
         height: 100vh;
         background-color: var(--color-bg);
-        z-index: 900;
+        z-index: 9995;
         padding: 100px 20px 40px;
     }
-    
+
     .mobile-menu-links {
         display: flex;
         flex-direction: column;
@@ -1542,14 +1565,14 @@ body.hovering-interactive .cursor-dot {
         gap: 30px;
         margin-bottom: 50px;
     }
-    
+
     .mobile-nav-link {
         font-family: var(--font-serif);
         font-size: 2.2rem;
         color: var(--color-text);
         text-align: center;
     }
-    
+
     .mobile-menu-cta {
         background-color: var(--color-text);
         color: var(--color-bg);
@@ -1558,94 +1581,99 @@ body.hovering-interactive .cursor-dot {
         font-weight: 600;
         font-size: 0.95rem;
     }
-    
-    .cursor-dot, .cursor-ring {
-        display: none; /* Hide custom cursor on mobile touch */
+
+    .cursor-dot,
+    .cursor-ring {
+        display: none;
+        /* Hide custom cursor on mobile touch */
     }
-    
-    a, button {
+
+    a,
+    button {
         cursor: auto;
     }
-    
+
     .hero {
         padding-top: 120px;
     }
-    
+
     .hero-heading {
         font-size: 3.2rem;
         letter-spacing: -0.08rem;
     }
-    
+
     .hero-meta {
         max-width: 100%;
         margin-bottom: 20px;
     }
-    
+
     .hero-footer {
         flex-direction: column;
         align-items: flex-start;
         gap: 30px;
     }
-    
+
     .hero-subtext {
         max-width: 100%;
     }
-    
+
     .manifesto-grid {
         grid-template-columns: 1fr;
         gap: 40px;
     }
-    
+
     .manifesto-paragraph {
         font-size: 1.6rem;
     }
-    
+
     .services-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 20px;
     }
-    
+
     .services-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
-    .card-large, .card-medium, .card-small {
+
+    .card-large,
+    .card-medium,
+    .card-small {
         grid-column: span 1;
         min-height: auto;
         padding: 30px;
     }
-    
+
     .results-grid {
         grid-template-columns: 1fr;
         gap: 40px;
     }
-    
+
     .result-box {
         padding-left: 20px;
     }
-    
+
     .contact-wrapper {
         grid-template-columns: 1fr;
         gap: 60px;
     }
-    
+
     .contact-title {
         font-size: 2.8rem;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 40px;
     }
-    
+
     .footer-top {
         flex-direction: column;
         gap: 30px;
         align-items: flex-start;
     }
-    
+
     .footer-bottom {
         flex-direction: column;
         gap: 30px;
@@ -1769,4 +1797,3 @@ body.hovering-interactive .cursor-dot {
     color: var(--color-text);
     transform: translateX(4px);
 }
-
