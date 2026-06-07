@@ -842,6 +842,27 @@ function initPageTransitions() {
             toggle.classList.toggle('active');
         });
     }
+
+    // Fix mobile nav link clicks
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('href');
+            if (menu) menu.classList.remove('active');
+            if (toggle) toggle.classList.remove('active');
+            if (target && target.startsWith('#')) {
+                const targetEl = document.querySelector(target);
+                if (targetEl && lenis) {
+                    setTimeout(() => {
+                        lenis.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+                    }, 300);
+                }
+            } else if (target) {
+                setTimeout(() => { window.location.href = target; }, 300);
+            }
+        });
+    });
 }
 
 /* 12. CLIENT-SIDE AUTHENTICATION SESSION SYSTEM */
