@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Dreamers Designs</title>
+<rect width="680" height="680" fill="#0A0A0A" rx="120"/>
+<rect x="190" y="160" width="12" height="360" fill="#ffffff"/>
+<path d="M202 160 Q340 160 400 200 Q470 248 470 340 Q470 432 400 480 Q340 520 202 520 Z" fill="#ffffff"/>
+<rect x="190" y="160" width="220" height="360" fill="#0A0A0A"/>
+<path d="M202 160 Q340 160 400 200 Q470 248 470 340 Q470 432 400 480 Q340 520 202 520 Z" fill="#ffffff"/>
+<rect x="202" y="160" width="180" height="360" fill="#0A0A0A"/>
+<path d="M202 185 Q330 175 390 215 Q450 258 450 340 Q450 422 390 465 Q330 505 202 495 Z" fill="#ffffff"/>
+<rect x="202" y="185" width="160" height="310" fill="#0A0A0A"/>
+<rect x="190" y="160" width="14" height="360" fill="#ffffff" rx="2"/>
+</svg>
