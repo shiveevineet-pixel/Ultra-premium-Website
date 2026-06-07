@@ -219,6 +219,12 @@ body.hovering-interactive .cursor-dot {
     pointer-events: none;
 }
 
+@media (max-width: 768px) {
+    .transition-overlay {
+        display: none;
+    }
+}
+
 /* 5. FLOATING NAVBAR */
 .navbar-container {
     position: fixed;
