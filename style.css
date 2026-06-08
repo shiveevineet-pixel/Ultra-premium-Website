@@ -40,14 +40,17 @@
     box-sizing: border-box;
 }
 
-html,
+html {
+    overflow-x: hidden;
+}
+
 body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow: hidden;
+    overflow-x: hidden;
     scroll-behavior: auto;
     /* Managed by Lenis */
 }
