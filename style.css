@@ -229,7 +229,7 @@ body.hovering-interactive .cursor-dot {
     left: 0;
     width: 100%;
     z-index: 990;
-    padding: 30px 40px 0;
+    padding: 45px 40px 0;
     pointer-events: none;
 }
 
@@ -247,7 +247,7 @@ body.hovering-interactive .cursor-dot {
     justify-content: space-between;
     padding: 0 32px;
     pointer-events: auto;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.01), 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
     transition: transform 0.4s ease, background-color 0.4s ease;
 }
 
@@ -1557,6 +1557,13 @@ body.hovering-interactive .cursor-dot {
 
     .navbar-container {
         padding: 20px 20px 0;
+    }
+
+    .navbar {
+        border-radius: 50px;
+        height: 56px;
+        margin: 0 auto;
+        width: calc(100% - 0px);
     }
 
     .navbar {
