@@ -597,7 +597,7 @@ body.hovering-interactive .cursor-dot {
     display: inline-flex;
     align-items: center;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
     transition: var(--transition-fast);
 }
 
