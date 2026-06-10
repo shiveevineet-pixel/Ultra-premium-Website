@@ -719,7 +719,376 @@
 
     </main>
 
+    <!-- DREAM AI CHAT WIDGET -->
+    <div id="dream-chat-btn" onclick="toggleDreamChat()" title="Chat with Dream">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Dream</span>
+        <div id="dream-unread"></div>
+    </div>
 
+    <div id="dream-chat-window">
+        <div id="dream-chat-header">
+            <div id="dream-header-info">
+                <div id="dream-avatar">D</div>
+                <div>
+                    <div id="dream-name">Dream</div>
+                    <div id="dream-status">● Online — Dreamers Designs AI</div>
+                </div>
+            </div>
+            <button onclick="toggleDreamChat()" id="dream-close">✕</button>
+        </div>
+        <div id="dream-chat-messages">
+            <div class="dream-msg dream-msg-ai">
+                <span>Hello. I'm Dream — your AI concierge at Dreamers Designs. How can I assist you today?</span>
+            </div>
+        </div>
+        <div id="dream-chat-input-area">
+            <input type="text" id="dream-input" placeholder="Ask me anything..."
+                onkeydown="if(event.key==='Enter') sendDreamMessage()" />
+            <button onclick="sendDreamMessage()" id="dream-send-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <style>
+        #dream-chat-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #0A0A0A;
+            color: #fff;
+            border: none;
+            border-radius: 100px;
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            z-index: 99999;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #dream-chat-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        #dream-unread {
+            display: none;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        #dream-chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 32px;
+            width: 380px;
+            height: 520px;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 99998;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            animation: dreamSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #dream-chat-window.open {
+            display: flex;
+        }
+
+        @keyframes dreamSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        #dream-chat-header {
+            background: #0A0A0A;
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        #dream-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #dream-avatar {
+            width: 38px;
+            height: 38px;
+            background: #fff;
+            color: #0A0A0A;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        #dream-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        #dream-status {
+            font-size: 0.7rem;
+            color: #10b981;
+            margin-top: 2px;
+        }
+
+        #dream-close {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        #dream-close:hover {
+            opacity: 1;
+        }
+
+        #dream-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f9f9f9;
+        }
+
+        .dream-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            animation: dreamFadeIn 0.3s ease;
+        }
+
+        @keyframes dreamFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dream-msg-ai {
+            background: #fff;
+            color: #0A0A0A;
+            border-radius: 16px 16px 16px 4px;
+            align-self: flex-start;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .dream-msg-user {
+            background: #0A0A0A;
+            color: #fff;
+            border-radius: 16px 16px 4px 16px;
+            align-self: flex-end;
+        }
+
+        .dream-typing {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .dream-typing span {
+            width: 6px;
+            height: 6px;
+            background: #999;
+            border-radius: 50%;
+            animation: dreamBounce 1.2s infinite;
+        }
+
+        .dream-typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dream-typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dreamBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        #dream-chat-input-area {
+            padding: 16px;
+            background: #fff;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            flex-shrink: 0;
+        }
+
+        #dream-input {
+            flex: 1;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 100px;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            outline: none;
+            background: #f9f9f9;
+            transition: border-color 0.2s;
+        }
+
+        #dream-input:focus {
+            border-color: #0A0A0A;
+            background: #fff;
+        }
+
+        #dream-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #0A0A0A;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            flex-shrink: 0;
+        }
+
+        #dream-send-btn:hover {
+            transform: scale(1.08);
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            #dream-chat-window {
+                width: calc(100vw - 24px);
+                right: 12px;
+                bottom: 90px;
+                height: 70vh;
+            }
+
+            #dream-chat-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 18px;
+            }
+        }
+    </style>
+
+    <script>
+        function toggleDreamChat() {
+            const win = document.getElementById('dream-chat-window');
+            const unread = document.getElementById('dream-unread');
+            win.classList.toggle('open');
+            unread.style.display = 'none';
+            if (win.classList.contains('open')) {
+                document.getElementById('dream-input').focus();
+            }
+        }
+
+        async function sendDreamMessage() {
+            const input = document.getElementById('dream-input');
+            const messages = document.getElementById('dream-chat-messages');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            input.value = '';
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'dream-msg dream-msg-user';
+            userMsg.innerHTML = `<span>${msg}</span>`;
+            messages.appendChild(userMsg);
+
+            // Add typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'dream-msg dream-msg-ai dream-typing';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            typing.id = 'dream-typing';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const res = await fetch('https://preetrajput12.app.n8n.cloud/webhook/c29d1bc6-f495-4f93-aac8-333b606cae80', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                const data = await res.json();
+                const reply = data.output || data.reply || data.text || data.message || 'I am here to help. Please try again.';
+
+                document.getElementById('dream-typing')?.remove();
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'dream-msg dream-msg-ai';
+                aiMsg.innerHTML = `<span>${reply}</span>`;
+                messages.appendChild(aiMsg);
+            } catch (err) {
+                document.getElementById('dream-typing')?.remove();
+                const errMsg = document.createElement('div');
+                errMsg.className = 'dream-msg dream-msg-ai';
+                errMsg.innerHTML = `<span>Connection issue. Please try again shortly.</span>`;
+                messages.appendChild(errMsg);
+            }
+
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
 </body>
 
 </html>
