@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders — Dreamers Designs</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+
+    <style>
+        :root {
+            --color-bg: #FFFFFF;
+            --color-bg-subtle: #F9F9F9;
+            --color-text: #0A0A0A;
+            --color-text-muted: #707070;
+            --color-border: rgba(10, 10, 10, 0.07);
+            --color-accent: #0A0A0A;
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-mono: 'Space Grotesk', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* CURSOR */
+        .cursor-dot {
+            width: 5px; height: 5px;
+            background: var(--color-text);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-ring {
+            width: 28px; height: 28px;
+            border: 1px solid rgba(10,10,10,0.4);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9998;
+            transform: translate(-50%, -50%);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 16px; left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 1400px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: 100px;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .nav-back {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.06em;
+            color: var(--color-text-muted);
+            display: flex; align-items: center; gap: 6px;
+            transition: color 0.3s;
+        }
+        .nav-back:hover { color: var(--color-text); }
+        .nav-back svg { width: 14px; height: 14px; }
+
+        /* AUTH GUARD */
+        #auth-guard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 40px;
+        }
+
+        #auth-guard .guard-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            color: var(--color-text-muted);
+            margin-bottom: 24px;
+        }
+
+        #auth-guard h2 {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+
+        #auth-guard p {
+            color: var(--color-text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+            max-width: 360px;
+        }
+
+        .btn-signin {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--color-text);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: opacity 0.3s;
+        }
+        .btn-signin:hover { opacity: 0.8; }
+
+        /* MAIN PAGE */
+        #orders-page { display: none; }
+
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 140px 40px 80px;
+        }
+
+        /* HEADER */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-header-left .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            color: var(--color-text-muted);
+            margin-bottom: 12px;
+        }
+
+        .page-header-left h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(2.4rem, 5vw, 4rem);
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        .page-header-left h1 em {
+            font-style: italic;
+            color: var(--color-text-muted);
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: 100px;
+        }
+
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: var(--color-text);
+            color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .user-info-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .user-email-text {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* STATS ROW */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--color-border);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 48px;
+        }
+
+        .stat-cell {
+            background: var(--color-bg);
+            padding: 28px 32px;
+        }
+
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            color: var(--color-text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 400;
+        }
+
+        /* ORDERS LIST */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* LOADING STATE */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 40px;
+            gap: 16px;
+        }
+
+        .loading-dots {
+            display: flex; gap: 6px;
+        }
+
+        .loading-dots span {
+            width: 6px; height: 6px;
+            background: var(--color-text-muted);
+            border-radius: 50%;
+            animation: loadBounce 1.2s infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .loading-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 40px;
+            text-align: center;
+            border: 1px dashed var(--color-border);
+            border-radius: 20px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 24px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            max-width: 320px;
+        }
+
+        /* ORDER CARD */
+        .order-card {
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .order-card:hover {
+            border-color: rgba(10,10,10,0.15);
+            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.08);
+        }
+
+        .order-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 32px;
+            background: var(--color-bg-subtle);
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+        }
+
+        .order-id-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .order-id {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+        }
+
+        .order-service-tag {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            background: #fff;
+            border: 1px solid var(--color-border);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .order-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .status-pending    { background: #FFF3CD; color: #856404; }
+        .status-active     { background: #D1ECF1; color: #0C5460; }
+        .status-inprogress { background: #CCE5FF; color: #004085; }
+        .status-completed  { background: #D4EDDA; color: #155724; }
+        .status-cancelled  { background: #F8D7DA; color: #721C24; }
+
+        .expand-btn {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid var(--color-border);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .expand-btn svg {
+            width: 12px; height: 12px;
+            transition: transform 0.3s;
+        }
+
+        .order-card.expanded .expand-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* ORDER BODY */
+        .order-card-body {
+            display: none;
+            padding: 32px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .order-card.expanded .order-card-body {
+            display: grid;
+        }
+
+        .detail-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .detail-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .detail-value.muted { color: var(--color-text-muted); font-weight: 400; font-style: italic; }
+
+        .order-notes {
+            grid-column: 1 / -1;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .notes-text {
+            font-size: 0.88rem;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+            margin-top: 8px;
+        }
+
+        /* FOOTER */
+        .page-footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--color-border);
+            margin-top: 80px;
+        }
+
+        .page-footer p {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: var(--color-text-muted);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .page-wrapper { padding: 120px 20px 60px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .order-card-body { grid-template-columns: 1fr 1fr; }
+            .order-card-header { padding: 18px 20px; }
+            .order-card-body { padding: 24px 20px; }
+            .navbar { width: calc(100% - 24px); padding: 12px 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .order-card-body { grid-template-columns: 1fr; }
+            .user-badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="../index.html" class="nav-logo">
+            <img src="../favicon.svg" style="width:22px;height:22px;border-radius:5px;vertical-align:middle;">
+            DREAMERS DESIGNS
+        </a>
+        <a href="../index.html" class="nav-back">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M12.3333 7H1.66667M1.66667 7L6.33333 2.33333M1.66667 7L6.33333 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to Home
+        </a>
+    </nav>
+
+    <!-- AUTH GUARD — shown when not logged in -->
+    <div id="auth-guard">
+        <p class="guard-label">RESTRICTED ACCESS</p>
+        <h2>Sign in to view<br><em>your orders</em></h2>
+        <p>This page is only available to registered clients of Dreamers Designs.</p>
+        <a href="../auth/login.html" class="btn-signin">
+            Sign In
+            <svg viewBox="0 0 14 14" fill="none" width="14"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+
+    <!-- ORDERS PAGE — shown when logged in -->
+    <div id="orders-page">
+        <div class="page-wrapper">
+
+            <!-- HEADER -->
+            <div class="page-header">
+                <div class="page-header-left">
+                    <p class="eyebrow">CLIENT PORTAL / ORDERS</p>
+                    <h1>Your <em>Projects</em></h1>
+                </div>
+                <div class="user-badge" id="user-badge">
+                    <div class="user-avatar" id="user-avatar">--</div>
+                    <div class="user-info-text">
+                        <span class="user-name-text" id="user-name-display">Loading...</span>
+                        <span class="user-email-text" id="user-email-display">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-row" id="stats-row">
+                <div class="stat-cell">
+                    <p class="stat-label">TOTAL ORDERS</p>
+                    <p class="stat-value" id="stat-total">—</p>
+                </div>
+                <div class="stat-cell">
+                    <p class="stat-label">IN PROGRESS</p>
+                    <p class="stat-value" id="stat-active">—</p>
+                </div>
+                <div class="stat-cell">
+                    <p class="stat-label">COMPLETED</p>
+                    <p class="stat-value" id="stat-completed">—</p>
+                </div>
+                <div class="stat-cell">
+                    <p class="stat-label">NEXT DELIVERY</p>
+                    <p class="stat-value" id="stat-next" style="font-size:1.2rem;padding-top:6px;">—</p>
+                </div>
+            </div>
+
+            <!-- ORDERS LIST -->
+            <div class="orders-list" id="orders-list">
+
+                <!-- LOADING -->
+                <div class="loading-state" id="loading-state">
+                    <div class="loading-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <p class="loading-label">FETCHING YOUR ORDERS</p>
+                </div>
+
+                <!-- EMPTY -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">◎</div>
+                    <h3>No orders yet</h3>
+                    <p>Once you book a service, your projects will appear here.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <p>DREAMERS DESIGNS — CLIENT PORTAL · Questions? Contact studio@dreamersdesigns.com</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+
+        // Cursor
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let rx = 0, ry = 0, mx = 0, my = 0;
+        window.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+        });
+        (function tick() {
+            rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+            ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+            requestAnimationFrame(tick);
+        })();
+
+        // Status badge helper
+        function getStatusClass(status) {
+            const s = (status || '').toLowerCase().replace(/\s/g, '');
+            if (s === 'pending') return 'status-pending';
+            if (s === 'active') return 'status-active';
+            if (s === 'inprogress' || s === 'in-progress') return 'status-inprogress';
+            if (s === 'completed' || s === 'done') return 'status-completed';
+            if (s === 'cancelled' || s === 'canceled') return 'status-cancelled';
+            return 'status-pending';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function renderOrders(orders) {
+            const list = document.getElementById('orders-list');
+            document.getElementById('loading-state').style.display = 'none';
+
+            if (!orders || orders.length === 0) {
+                document.getElementById('empty-state').style.display = 'flex';
+                return;
+            }
+
+            // Stats
+            const total = orders.length;
+            const active = orders.filter(o => ['active','inprogress','in-progress','in progress'].includes((o.status||'').toLowerCase())).length;
+            const completed = orders.filter(o => ['completed','done'].includes((o.status||'').toLowerCase())).length;
+
+            // Next delivery
+            const upcoming = orders
+                .filter(o => o.estimated_delivery && new Date(o.estimated_delivery) >= new Date())
+                .sort((a,b) => new Date(a.estimated_delivery) - new Date(b.estimated_delivery));
+
+            document.getElementById('stat-total').textContent = String(total).padStart(2, '0');
+            document.getElementById('stat-active').textContent = String(active).padStart(2, '0');
+            document.getElementById('stat-completed').textContent = String(completed).padStart(2, '0');
+            document.getElementById('stat-next').textContent = upcoming.length ? formatDate(upcoming[0].estimated_delivery) : '—';
+
+            // Render cards
+            orders.forEach((order, i) => {
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.innerHTML = `
+                    <div class="order-card-header" onclick="toggleCard(this)">
+                        <div class="order-id-group">
+                            <span class="order-id">#${order.order_id || 'N/A'}</span>
+                            <span class="order-service-tag">${order.service || 'Service'}</span>
+                        </div>
+                        <div class="order-header-right">
+                            <span class="status-badge ${getStatusClass(order.status)}">${(order.status || 'Pending').toUpperCase()}</span>
+                            <div class="expand-btn">
+                                <svg viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-card-body">
+                        <div class="detail-group">
+                            <span class="detail-label">SERVICE</span>
+                            <span class="detail-value">${order.service || '—'}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">STATUS</span>
+                            <span class="detail-value">${order.status || '—'}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">ORDER DATE</span>
+                            <span class="detail-value">${formatDate(order.created_at)}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">CLIENT NAME</span>
+                            <span class="detail-value">${order.customer_name || '—'}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">CLIENT EMAIL</span>
+                            <span class="detail-value">${order.customer_email || '—'}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">ESTIMATED DELIVERY</span>
+                            <span class="detail-value">${formatDate(order.estimated_delivery)}</span>
+                        </div>
+                        ${order.notes ? `
+                        <div class="order-notes detail-group">
+                            <span class="detail-label">NOTES</span>
+                            <p class="notes-text">${order.notes}</p>
+                        </div>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
+
+                // Animate in
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + i * 80);
+            });
+        }
+
+        function toggleCard(header) {
+            const card = header.closest('.order-card');
+            card.classList.toggle('expanded');
+        }
+
+        // MAIN INIT
+        window.addEventListener('load', async () => {
+            const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // Check session
+            const { data: { session } } = await _supabase.auth.getSession();
+            const sbUser = session?.user;
+
+            // Also check localStorage fallback
+            const localUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            const user = sbUser || localUser;
+
+            if (!user) {
+                // Not logged in — show guard
+                document.getElementById('auth-guard').style.display = 'flex';
+                return;
+            }
+
+            // Logged in — show orders page
+            document.getElementById('auth-guard').style.display = 'none';
+            document.getElementById('orders-page').style.display = 'block';
+
+            // Populate user info
+            const name = sbUser?.user_metadata?.full_name || localUser?.name || sbUser?.email || 'Client';
+            const email = sbUser?.email || localUser?.email || '';
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('user-name-display').textContent = name;
+            document.getElementById('user-email-display').textContent = email;
+
+            // Fetch orders from Supabase
+            try {
+                const { data: orders, error } = await _supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('customer_email', email)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                renderOrders(orders);
+            } catch (err) {
+                console.error('Orders fetch error:', err);
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>

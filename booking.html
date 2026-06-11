@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Service — Dreamers Designs</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg: #0A0A0A;
+            --bg-card: #111111;
+            --bg-input: #161616;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.18);
+            --text: #F5F5F0;
+            --text-muted: rgba(245,245,240,0.45);
+            --accent: #F5F5F0;
+            --font-serif: 'Instrument Serif', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-mono: 'Space Grotesk', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            cursor: none;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        button, input, textarea, select { font-family: inherit; color: inherit; background: none; border: none; outline: none; cursor: none; }
+
+        /* CURSOR */
+        .cursor-dot {
+            width: 5px; height: 5px;
+            background: var(--text);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+        .cursor-ring {
+            width: 28px; height: 28px;
+            border: 1px solid rgba(245,245,240,0.3);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9998;
+            transform: translate(-50%, -50%);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 16px; left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 1400px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(10,10,10,0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .nav-back {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 6px;
+            transition: color 0.3s;
+        }
+        .nav-back:hover { color: var(--text); }
+
+        .nav-user-pill {
+            display: none;
+            align-items: center; gap: 8px;
+            padding: 6px 14px 6px 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+        }
+
+        .nav-avatar {
+            width: 26px; height: 26px;
+            background: var(--text);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+
+        .nav-user-name {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* AUTH GUARD */
+        #auth-guard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .guard-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .guard-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 400;
+            line-height: 1.05;
+            margin-bottom: 20px;
+        }
+
+        .guard-title em { font-style: italic; color: var(--text-muted); }
+
+        .guard-sub {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            max-width: 380px;
+            margin-bottom: 48px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center; gap: 10px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 15px 36px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        /* MAIN PAGE */
+        #booking-page { display: none; }
+
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 140px 40px 100px;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            margin-bottom: 72px;
+        }
+
+        .page-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .page-title {
+            font-family: var(--font-serif);
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 400;
+            line-height: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .page-title em { font-style: italic; color: var(--text-muted); }
+
+        .page-sub {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 480px;
+        }
+
+        /* GRID LAYOUT */
+        .booking-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* ESTIMATE SUMMARY CARD */
+        .estimate-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            position: sticky;
+            top: 100px;
+        }
+
+        .estimate-card-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .estimate-card-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .estimate-card-title {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .estimate-services-list {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .service-chip {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.83rem;
+        }
+
+        .service-chip-name { font-weight: 500; }
+        .service-chip-price { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+
+        .no-services-msg {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .estimate-totals {
+            padding: 24px 32px;
+        }
+
+        .total-row {
+            display: flex; justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .total-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .total-value {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .total-row.main .total-value {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 400;
+        }
+
+        .total-disclaimer {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* BOOKING FORM */
+        .booking-form-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .form-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .form-section-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .form-section-num {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            width: 28px; height: 28px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .form-section-title {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        .form-section-body {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 0.88rem;
+            color: var(--text);
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--border-hover);
+        }
+
+        .form-input[readonly] {
+            color: var(--text-muted);
+            cursor: default;
+        }
+
+        .form-textarea {
+            resize: none;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .form-select option {
+            background: #1a1a1a;
+            color: var(--text);
+        }
+
+        /* SERVICE SELECTOR */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .service-pill {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: none;
+            transition: all 0.25s;
+            display: flex; flex-direction: column; gap: 4px;
+            align-items: center;
+        }
+
+        .service-pill:hover {
+            border-color: var(--border-hover);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .service-pill.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .service-pill-price {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            opacity: 0.6;
+        }
+
+        /* COMPLEXITY SLIDER */
+        .complexity-slider-wrap { padding: 8px 0; }
+
+        .complexity-labels {
+            display: flex; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .complexity-label-item {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            text-align: center;
+            flex: 1;
+        }
+
+        .luxury-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            background: var(--border-hover);
+            border-radius: 2px;
+            outline: none;
+            cursor: none;
+        }
+
+        .luxury-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            background: var(--text);
+            border-radius: 50%;
+            cursor: none;
+        }
+
+        .complexity-current {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        /* SUBMIT BUTTON */
+        .submit-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: var(--text);
+            color: var(--bg);
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: opacity 0.3s, transform 0.3s;
+            cursor: none;
+        }
+
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.4; transform: none; }
+
+        .submit-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* SUCCESS STATE */
+        #success-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 80px 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .success-icon {
+            width: 64px; height: 64px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 28px;
+        }
+
+        .success-title {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+
+        .success-title em { font-style: italic; color: var(--text-muted); }
+
+        .success-sub {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+
+        .success-order-id {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            margin-bottom: 32px;
+            color: var(--text-muted);
+        }
+
+        .success-order-id span { color: var(--text); font-weight: 600; }
+
+        .btn-view-orders {
+            display: inline-flex;
+            align-items: center; gap: 8px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 14px 32px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            transition: opacity 0.3s;
+        }
+        .btn-view-orders:hover { opacity: 0.85; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .booking-grid { grid-template-columns: 1fr; }
+            .estimate-card { position: static; }
+        }
+
+        @media (max-width: 600px) {
+            .page-wrapper { padding: 120px 20px 80px; }
+            .form-row { grid-template-columns: 1fr; }
+            .services-grid { grid-template-columns: 1fr 1fr; }
+            .navbar { width: calc(100% - 24px); padding: 12px 18px; }
+            .form-section-body { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <img src="favicon.svg" style="width:22px;height:22px;border-radius:5px;vertical-align:middle;margin-right:4px;">
+            DREAMERS DESIGNS
+        </a>
+        <div class="nav-right">
+            <a href="index.html" class="nav-back">
+                <svg viewBox="0 0 14 14" fill="none" width="13"><path d="M12.3333 7H1.66667M1.66667 7L6.33333 2.33333M1.66667 7L6.33333 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Back
+            </a>
+            <div class="nav-user-pill" id="nav-user-pill">
+                <div class="nav-avatar" id="nav-avatar">--</div>
+                <span class="nav-user-name" id="nav-user-name">...</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AUTH GUARD -->
+    <div id="auth-guard">
+        <p class="guard-eyebrow">ACCESS REQUIRED</p>
+        <h1 class="guard-title">Sign in to<br><em>book a service</em></h1>
+        <p class="guard-sub">Create an account or sign in to book your project with Dreamers Designs and track it in real time.</p>
+        <a href="auth/login.html" class="btn-primary">
+            Sign In
+            <svg viewBox="0 0 14 14" fill="none" width="14"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+
+    <!-- BOOKING PAGE -->
+    <div id="booking-page">
+        <div class="page-wrapper">
+
+            <div class="page-header">
+                <p class="page-eyebrow">06 / COMMISSION</p>
+                <h1 class="page-title">Book your<br><em>masterpiece.</em></h1>
+                <p class="page-sub">Configure your project below. Once submitted, your order is instantly tracked in your client portal.</p>
+            </div>
+
+            <div class="booking-grid">
+
+                <!-- LEFT: FORM -->
+                <div class="booking-form-wrapper" id="booking-form-wrapper">
+
+                    <!-- SUCCESS STATE -->
+                    <div id="success-state">
+                        <div class="success-icon">✦</div>
+                        <h2 class="success-title">Order <em>confirmed.</em></h2>
+                        <p class="success-sub">Your project has been logged and our principal partners will reach out within 24 hours to begin the discovery workshop.</p>
+                        <div class="success-order-id">ORDER ID: <span id="success-order-id-val">—</span></div>
+                        <a href="orders.html" class="btn-view-orders">
+                            View My Orders
+                            <svg viewBox="0 0 14 14" fill="none" width="13"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- SECTION 1: CLIENT INFO (auto-filled) -->
+                    <div class="form-section" id="form-section-1">
+                        <div class="form-section-header">
+                            <span class="form-section-num">01</span>
+                            <span class="form-section-title">CLIENT INFORMATION</span>
+                        </div>
+                        <div class="form-section-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">FULL NAME</label>
+                                    <input type="text" class="form-input" id="field-name" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">EMAIL ADDRESS</label>
+                                    <input type="text" class="form-input" id="field-email" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: SERVICE SELECTION -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <span class="form-section-num">02</span>
+                            <span class="form-section-title">SELECT SERVICES</span>
+                        </div>
+                        <div class="form-section-body">
+                            <div class="services-grid" id="services-grid">
+                                <div class="service-pill" data-service="Web Development" data-cost="499" data-time="4" onclick="toggleService(this)">
+                                    <span>Web Development</span>
+                                    <span class="service-pill-price">from $499</span>
+                                </div>
+                                <div class="service-pill" data-service="AI Chatbots" data-cost="299" data-time="3" onclick="toggleService(this)">
+                                    <span>AI Chatbots</span>
+                                    <span class="service-pill-price">from $299</span>
+                                </div>
+                                <div class="service-pill" data-service="Automation Systems" data-cost="399" data-time="3" onclick="toggleService(this)">
+                                    <span>Automation Systems</span>
+                                    <span class="service-pill-price">from $399</span>
+                                </div>
+                                <div class="service-pill" data-service="Branding & Graphics" data-cost="199" data-time="2" onclick="toggleService(this)">
+                                    <span>Branding & Graphics</span>
+                                    <span class="service-pill-price">from $199</span>
+                                </div>
+                                <div class="service-pill" data-service="Thumbnail Design" data-cost="49" data-time="1" onclick="toggleService(this)">
+                                    <span>Thumbnail Design</span>
+                                    <span class="service-pill-price">from $49</span>
+                                </div>
+                                <div class="service-pill" data-service="Social Media Creatives" data-cost="149" data-time="2" onclick="toggleService(this)">
+                                    <span>Social Media Creatives</span>
+                                    <span class="service-pill-price">from $149</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: COMPLEXITY -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <span class="form-section-num">03</span>
+                            <span class="form-section-title">SCALE & COMPLEXITY</span>
+                        </div>
+                        <div class="form-section-body">
+                            <div class="complexity-slider-wrap">
+                                <div class="complexity-labels">
+                                    <span class="complexity-label-item">Bespoke Core</span>
+                                    <span class="complexity-label-item">Multi-Integration</span>
+                                    <span class="complexity-label-item">Enterprise</span>
+                                </div>
+                                <input type="range" min="1" max="3" value="1" step="1" class="luxury-slider" id="complexity-slider" oninput="updateComplexity(this)">
+                                <p class="complexity-current" id="complexity-label">Standard Infrastructure (1×)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: PROJECT BRIEF -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <span class="form-section-num">04</span>
+                            <span class="form-section-title">PROJECT BRIEF</span>
+                        </div>
+                        <div class="form-section-body">
+                            <div class="form-group">
+                                <label class="form-label">DESCRIBE YOUR PROJECT</label>
+                                <textarea class="form-textarea" id="field-brief" placeholder="Tell us about your vision, goals, references, and any specific requirements..." rows="5"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">BUDGET RANGE</label>
+                                    <select class="form-select" id="field-budget">
+                                        <option value="">Select range</option>
+                                        <option>Under $500</option>
+                                        <option>$500 – $1,000</option>
+                                        <option>$1,000 – $2,500</option>
+                                        <option>$2,500 – $5,000</option>
+                                        <option>$5,000+</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IDEAL TIMELINE</label>
+                                    <select class="form-select" id="field-timeline">
+                                        <option value="">Select timeline</option>
+                                        <option>ASAP</option>
+                                        <option>1–2 weeks</option>
+                                        <option>2–4 weeks</option>
+                                        <option>1–2 months</option>
+                                        <option>Flexible</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT -->
+                    <div class="submit-section">
+                        <button class="btn-submit" id="submit-btn" onclick="submitBooking()">
+                            <span id="submit-btn-text">Commission Project</span>
+                            <svg viewBox="0 0 14 14" fill="none" width="14"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <p class="submit-note">By submitting, you agree that this is an initial project inquiry. A discovery call will confirm final scope and pricing.</p>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT: ESTIMATE SUMMARY -->
+                <div class="estimate-card" id="estimate-card">
+                    <div class="estimate-card-header">
+                        <p class="estimate-card-label">YOUR CONFIGURATION</p>
+                        <h3 class="estimate-card-title">Project Summary</h3>
+                    </div>
+                    <div class="estimate-services-list" id="estimate-services-list">
+                        <p class="no-services-msg">No services selected yet</p>
+                    </div>
+                    <div class="estimate-totals">
+                        <div class="total-row">
+                            <span class="total-label">TIMELINE</span>
+                            <span class="total-value" id="summary-time">— weeks</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">COMPLEXITY</span>
+                            <span class="total-value" id="summary-complexity">1×</span>
+                        </div>
+                        <div class="total-row main">
+                            <span class="total-label">ESTIMATE</span>
+                            <span class="total-value">$<span id="summary-cost">0</span></span>
+                        </div>
+                        <p class="total-disclaimer">* Final pricing confirmed after discovery workshop. This is a directional estimate only.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+
+        let _supabase;
+        let currentUser = null;
+        let selectedServices = [];
+        let complexity = 1;
+
+        // CURSOR
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let rx = 0, ry = 0, mx = 0, my = 0;
+        window.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+        });
+        (function tick() {
+            rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+            ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+            requestAnimationFrame(tick);
+        })();
+
+        // AUTH INIT
+        window.addEventListener('load', async () => {
+            _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const { data: { session } } = await _supabase.auth.getSession();
+            const sbUser = session?.user;
+
+            if (!sbUser) {
+                document.getElementById('auth-guard').style.display = 'flex';
+                return;
+            }
+
+            // User is logged in
+            currentUser = sbUser;
+            const name = sbUser.user_metadata?.full_name || sbUser.email;
+            const email = sbUser.email;
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+            // Show booking page
+            document.getElementById('auth-guard').style.display = 'none';
+            document.getElementById('booking-page').style.display = 'block';
+
+            // Fill nav pill
+            document.getElementById('nav-avatar').textContent = initials;
+            document.getElementById('nav-user-name').textContent = name.split(' ')[0];
+            document.getElementById('nav-user-pill').style.display = 'flex';
+
+            // Auto-fill client info
+            document.getElementById('field-name').value = name;
+            document.getElementById('field-email').value = email;
+
+            // Check for estimate params from index.html estimator
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('cost')) {
+                document.getElementById('summary-cost').textContent = params.get('cost');
+            }
+            if (params.get('time')) {
+                document.getElementById('summary-time').textContent = params.get('time') + ' weeks';
+            }
+            if (params.get('services')) {
+                const serviceNames = params.get('services').split(',');
+                serviceNames.forEach(name => {
+                    const pill = document.querySelector(`.service-pill[data-service="${name.trim()}"]`);
+                    if (pill) {
+                        pill.classList.add('active');
+                        selectedServices.push({
+                            name: pill.dataset.service,
+                            cost: parseInt(pill.dataset.cost),
+                            time: parseInt(pill.dataset.time)
+                        });
+                    }
+                });
+                updateSummary();
+            }
+        });
+
+        // SERVICE TOGGLE
+        function toggleService(pill) {
+            const name = pill.dataset.service;
+            const cost = parseInt(pill.dataset.cost);
+            const time = parseInt(pill.dataset.time);
+
+            if (pill.classList.contains('active')) {
+                pill.classList.remove('active');
+                selectedServices = selectedServices.filter(s => s.name !== name);
+            } else {
+                pill.classList.add('active');
+                selectedServices.push({ name, cost, time });
+            }
+            updateSummary();
+        }
+
+        // COMPLEXITY
+        function updateComplexity(slider) {
+            complexity = parseInt(slider.value);
+            const labels = ['', 'Standard Infrastructure (1×)', 'Multi-Integration (1.5×)', 'Enterprise Architecture (2×)'];
+            document.getElementById('complexity-label').textContent = labels[complexity];
+            document.getElementById('summary-complexity').textContent = complexity === 1 ? '1×' : complexity === 2 ? '1.5×' : '2×';
+            updateSummary();
+        }
+
+        // UPDATE SUMMARY CARD
+        function updateSummary() {
+            const list = document.getElementById('estimate-services-list');
+            const multiplier = complexity === 1 ? 1 : complexity === 2 ? 1.5 : 2;
+
+            if (selectedServices.length === 0) {
+                list.innerHTML = '<p class="no-services-msg">No services selected yet</p>';
+                document.getElementById('summary-cost').textContent = '0';
+                document.getElementById('summary-time').textContent = '— weeks';
+                return;
+            }
+
+            list.innerHTML = selectedServices.map(s => `
+                <div class="service-chip">
+                    <span class="service-chip-name">${s.name}</span>
+                    <span class="service-chip-price">$${Math.round(s.cost * multiplier)}</span>
+                </div>
+            `).join('');
+
+            const totalCost = Math.round(selectedServices.reduce((a, s) => a + s.cost, 0) * multiplier);
+            const totalTime = selectedServices.reduce((a, s) => a + s.time, 0);
+
+            document.getElementById('summary-cost').textContent = totalCost.toLocaleString();
+            document.getElementById('summary-time').textContent = totalTime + ' weeks';
+        }
+
+        // SUBMIT BOOKING
+        async function submitBooking() {
+            if (!currentUser) return;
+
+            if (selectedServices.length === 0) {
+                alert('Please select at least one service.');
+                return;
+            }
+
+            const brief = document.getElementById('field-brief').value.trim();
+            const budget = document.getElementById('field-budget').value;
+            const timeline = document.getElementById('field-timeline').value;
+
+            const btn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('submit-btn-text');
+            btn.disabled = true;
+            btnText.textContent = 'Submitting...';
+
+            const multiplier = complexity === 1 ? 1 : complexity === 2 ? 1.5 : 2;
+            const totalCost = Math.round(selectedServices.reduce((a, s) => a + s.cost, 0) * multiplier);
+            const totalWeeks = selectedServices.reduce((a, s) => a + s.time, 0);
+
+            // Generate order ID
+            const orderId = 'DD-' + Date.now().toString().slice(-6);
+
+            // Estimate delivery date
+            const delivery = new Date();
+            delivery.setDate(delivery.getDate() + totalWeeks * 7);
+            const deliveryStr = delivery.toISOString().split('T')[0];
+
+            // Notes string
+            const notes = [
+                brief ? `Brief: ${brief}` : '',
+                budget ? `Budget: ${budget}` : '',
+                timeline ? `Ideal timeline: ${timeline}` : '',
+                `Complexity: ${complexity === 1 ? 'Standard' : complexity === 2 ? 'Multi-Integration' : 'Enterprise'}`,
+                `Estimate: $${totalCost}`
+            ].filter(Boolean).join(' | ');
+
+            try {
+                const { error } = await _supabase.from('orders').insert({
+                    order_id: orderId,
+                    customer_email: currentUser.email,
+                    customer_name: currentUser.user_metadata?.full_name || currentUser.email,
+                    service: selectedServices.map(s => s.name).join(', '),
+                    status: 'pending',
+                    created_at: new Date().toISOString(),
+                    estimated_delivery: deliveryStr,
+                    notes: notes
+                });
+
+                if (error) throw error;
+
+                // Show success
+                document.getElementById('form-section-1').style.display = 'none';
+                document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
+                document.querySelector('.submit-section').style.display = 'none';
+                document.getElementById('success-state').style.display = 'flex';
+                document.getElementById('success-order-id-val').textContent = orderId;
+
+            } catch (err) {
+                console.error('Booking error:', err);
+                btn.disabled = false;
+                btnText.textContent = 'Commission Project';
+                alert('Something went wrong. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
