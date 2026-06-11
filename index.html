@@ -1066,11 +1066,18 @@
                 const res = await fetch('https://preetrajput12.app.n8n.cloud/webhook/c29d1bc6-f495-4f93-aac8-333b606cae80', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
+                    body: JSON.stringify({
+                        message: msg,
+                        sessionId: 'user-' + (localStorage.getItem('dream-session') || (() => {
+                            const id = Date.now().toString();
+                            localStorage.setItem('dream-session', id);
+                            return id;
+                        })())
+                    })
                 });
 
                 const data = await res.json();
-                const reply = data.output || data.reply || data.text || data.message || 'I am here to help. Please try again.';
+                const reply = data?.output || data?.[0]?.output || data?.text || data?.[0]?.text || data?.message || data?.[0]?.message || 'I am here to help. Please try again.';
 
                 document.getElementById('dream-typing')?.remove();
 
