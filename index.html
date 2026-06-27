@@ -31,8 +31,8 @@
     <!-- Core Script -->
     <script src="script.js" defer></script>
     <script>
-        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+        const SUPABASE_URL = 'https://nikibjzvpmplsegbziia.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pa2lianp2cG1wbHNlZ2J6aWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NjMwOTcsImV4cCI6MjA5NzIzOTA5N30.AmYlCK_gIuR7VYFYTpE6IMMLwyYX9EI865QTcOFiWkQ';
 
         async function initAuth() {
             const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1031,6 +1031,29 @@
     </style>
 
     <script>
+        // ─── GROQ API CONFIG ───────────────────────────────────────────────────────
+        const GROQ_API_KEY = "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"; // ← Paste your Groq API key here
+        const GROQ_MODEL = 'llama-3.3-70b-versatile'; // fast & capable; change if needed
+
+        const DREAM_SYSTEM_PROMPT = `You are Dream, the AI concierge for Dreamers Designs — a premium Swiss-inspired digital studio based in Gurugram, India. You represent a luxury brand that engineers bespoke websites, AI chatbots, automation systems, branding, thumbnail design, and social media creatives.
+
+Your personality: sophisticated, concise, helpful, and subtly confident — like a high-end customer service rep who actually knows the product inside out. Never use generic filler phrases. Keep responses tight and useful.
+
+Services & pricing (approximate):
+- Website Development (Next.js/React/Webflow): from $499, ~4 weeks
+- AI Chatbots (GPT-4 powered): from $299, ~3 weeks  
+- Automation Systems (Zapier/Make/n8n): from $399, ~3 weeks
+- Branding & Graphics: from $199, ~2 weeks
+- Thumbnail Design: from $49, ~1 week
+- Social Media Creatives: from $149, ~2 weeks
+
+For detailed quotes, direct users to the Interactive Cost Estimator on the page (#estimator) or the booking form (booking.html). For project inquiries, direct them to the contact section or email dreamersdesgins@gmail.com.
+
+If asked something outside Dreamers Designs' scope, politely say you can only assist with studio-related queries and suggest they reach out via the contact form.`;
+
+        // Conversation history (in-memory, resets on page reload — by design)
+        let dreamHistory = [];
+
         function toggleDreamChat() {
             const win = document.getElementById('dream-chat-window');
             const unread = document.getElementById('dream-unread');
@@ -1043,58 +1066,92 @@
 
         async function sendDreamMessage() {
             const input = document.getElementById('dream-input');
-            const messages = document.getElementById('dream-chat-messages');
+            const msgArea = document.getElementById('dream-chat-messages');
             const msg = input.value.trim();
             if (!msg) return;
 
             input.value = '';
+            input.disabled = true;
+            document.getElementById('dream-send-btn').disabled = true;
 
-            // Add user message
-            const userMsg = document.createElement('div');
-            userMsg.className = 'dream-msg dream-msg-user';
-            userMsg.innerHTML = `<span>${msg}</span>`;
-            messages.appendChild(userMsg);
+            // Render user bubble
+            const userBubble = document.createElement('div');
+            userBubble.className = 'dream-msg dream-msg-user';
+            userBubble.innerHTML = `<span>${escapeHtml(msg)}</span>`;
+            msgArea.appendChild(userBubble);
 
-            // Add typing indicator
-            const typing = document.createElement('div');
-            typing.className = 'dream-msg dream-msg-ai dream-typing';
-            typing.innerHTML = '<span></span><span></span><span></span>';
-            typing.id = 'dream-typing';
-            messages.appendChild(typing);
-            messages.scrollTop = messages.scrollHeight;
+            // Typing indicator
+            const typingEl = document.createElement('div');
+            typingEl.className = 'dream-msg dream-msg-ai dream-typing';
+            typingEl.id = 'dream-typing';
+            typingEl.innerHTML = '<span></span><span></span><span></span>';
+            msgArea.appendChild(typingEl);
+            msgArea.scrollTop = msgArea.scrollHeight;
+
+            // Push to history
+            dreamHistory.push({ role: 'user', content: msg });
 
             try {
-                const res = await fetch('https://preetrajput12.app.n8n.cloud/webhook/c29d1bc6-f495-4f93-aac8-333b606cae80', {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GROQ_API_KEY}`
+                    },
                     body: JSON.stringify({
-                        message: msg,
-                        sessionId: 'user-' + (localStorage.getItem('dream-session') || (() => {
-                            const id = Date.now().toString();
-                            localStorage.setItem('dream-session', id);
-                            return id;
-                        })())
+                        model: GROQ_MODEL,
+                        messages: [
+                            { role: 'system', content: DREAM_SYSTEM_PROMPT },
+                            ...dreamHistory
+                        ],
+                        max_tokens: 400,
+                        temperature: 0.65
                     })
                 });
 
                 const data = await res.json();
-                const reply = data?.output || data?.[0]?.output || data?.text || data?.[0]?.text || data?.message || data?.[0]?.message || 'I am here to help. Please try again.';
+                const reply = data?.choices?.[0]?.message?.content?.trim()
+                    || 'Something went wrong on my end. Please try again.';
+
+                // Save assistant turn
+                dreamHistory.push({ role: 'assistant', content: reply });
+
+                // Keep history manageable (last 20 turns = 10 exchanges)
+                if (dreamHistory.length > 20) dreamHistory = dreamHistory.slice(-20);
 
                 document.getElementById('dream-typing')?.remove();
 
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'dream-msg dream-msg-ai';
-                aiMsg.innerHTML = `<span>${reply}</span>`;
-                messages.appendChild(aiMsg);
+                const aiBubble = document.createElement('div');
+                aiBubble.className = 'dream-msg dream-msg-ai';
+                aiBubble.innerHTML = `<span>${formatDreamReply(reply)}</span>`;
+                msgArea.appendChild(aiBubble);
+
             } catch (err) {
                 document.getElementById('dream-typing')?.remove();
-                const errMsg = document.createElement('div');
-                errMsg.className = 'dream-msg dream-msg-ai';
-                errMsg.innerHTML = `<span>Connection issue. Please try again shortly.</span>`;
-                messages.appendChild(errMsg);
+                const errBubble = document.createElement('div');
+                errBubble.className = 'dream-msg dream-msg-ai';
+                errBubble.innerHTML = `<span>Connection issue — please try again in a moment.</span>`;
+                msgArea.appendChild(errBubble);
             }
 
-            messages.scrollTop = messages.scrollHeight;
+            input.disabled = false;
+            document.getElementById('dream-send-btn').disabled = false;
+            input.focus();
+            msgArea.scrollTop = msgArea.scrollHeight;
+        }
+
+        // Sanitise user input before rendering
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // Light markdown: **bold**, newlines → <br>
+        function formatDreamReply(text) {
+            return text
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
         }
     </script>
 </body>
