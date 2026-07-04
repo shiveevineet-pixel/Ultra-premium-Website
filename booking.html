@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap"
+        rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -17,19 +20,25 @@
             --bg: #0A0A0A;
             --bg-card: #111111;
             --bg-input: #161616;
-            --border: rgba(255,255,255,0.07);
-            --border-hover: rgba(255,255,255,0.18);
+            --border: rgba(255, 255, 255, 0.07);
+            --border-hover: rgba(255, 255, 255, 0.18);
             --text: #F5F5F0;
-            --text-muted: rgba(245,245,240,0.45);
+            --text-muted: rgba(245, 245, 240, 0.45);
             --accent: #F5F5F0;
             --font-serif: 'Instrument Serif', Georgia, serif;
             --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
             --font-mono: 'Space Grotesk', monospace;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             background: var(--bg);
@@ -40,38 +49,64 @@
             cursor: none;
         }
 
-        a { color: inherit; text-decoration: none; }
-        button, input, textarea, select { font-family: inherit; color: inherit; background: none; border: none; outline: none; cursor: none; }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+            color: inherit;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: none;
+        }
 
         /* CURSOR */
         .cursor-dot {
-            width: 5px; height: 5px;
+            width: 5px;
+            height: 5px;
             background: var(--text);
             border-radius: 50%;
-            position: fixed; top: 0; left: 0;
-            pointer-events: none; z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
             transform: translate(-50%, -50%);
             transition: transform 0.1s;
         }
+
         .cursor-ring {
-            width: 28px; height: 28px;
-            border: 1px solid rgba(245,245,240,0.3);
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(245, 245, 240, 0.3);
             border-radius: 50%;
-            position: fixed; top: 0; left: 0;
-            pointer-events: none; z-index: 9998;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9998;
             transform: translate(-50%, -50%);
         }
 
         /* NAVBAR */
         .navbar {
-            position: fixed; top: 16px; left: 50%;
+            position: fixed;
+            top: 16px;
+            left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 48px);
             max-width: 1400px;
-            display: flex; align-items: center;
+            display: flex;
+            align-items: center;
             justify-content: space-between;
             padding: 14px 28px;
-            background: rgba(10,10,10,0.85);
+            background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(24px);
             border: 1px solid var(--border);
             border-radius: 100px;
@@ -83,11 +118,15 @@
             font-size: 0.8rem;
             font-weight: 500;
             letter-spacing: 0.08em;
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-right {
-            display: flex; align-items: center; gap: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         .nav-back {
@@ -95,14 +134,20 @@
             font-size: 0.72rem;
             letter-spacing: 0.08em;
             color: var(--text-muted);
-            display: flex; align-items: center; gap: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             transition: color 0.3s;
         }
-        .nav-back:hover { color: var(--text); }
+
+        .nav-back:hover {
+            color: var(--text);
+        }
 
         .nav-user-pill {
             display: none;
-            align-items: center; gap: 8px;
+            align-items: center;
+            gap: 8px;
             padding: 6px 14px 6px 6px;
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -110,11 +155,14 @@
         }
 
         .nav-avatar {
-            width: 26px; height: 26px;
+            width: 26px;
+            height: 26px;
             background: var(--text);
             color: var(--bg);
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: var(--font-mono);
             font-size: 0.6rem;
             font-weight: 600;
@@ -153,7 +201,10 @@
             margin-bottom: 20px;
         }
 
-        .guard-title em { font-style: italic; color: var(--text-muted); }
+        .guard-title em {
+            font-style: italic;
+            color: var(--text-muted);
+        }
 
         .guard-sub {
             color: var(--text-muted);
@@ -165,7 +216,8 @@
 
         .btn-primary {
             display: inline-flex;
-            align-items: center; gap: 10px;
+            align-items: center;
+            gap: 10px;
             background: var(--text);
             color: var(--bg);
             padding: 15px 36px;
@@ -175,10 +227,16 @@
             letter-spacing: 0.04em;
             transition: opacity 0.3s, transform 0.3s;
         }
-        .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        .btn-primary:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
 
         /* MAIN PAGE */
-        #booking-page { display: none; }
+        #booking-page {
+            display: none;
+        }
 
         .page-wrapper {
             max-width: 1100px;
@@ -207,7 +265,10 @@
             margin-bottom: 20px;
         }
 
-        .page-title em { font-style: italic; color: var(--text-muted); }
+        .page-title em {
+            font-style: italic;
+            color: var(--text-muted);
+        }
 
         .page-sub {
             color: var(--text-muted);
@@ -262,17 +323,25 @@
         }
 
         .service-chip {
-            display: flex; align-items: center;
+            display: flex;
+            align-items: center;
             justify-content: space-between;
             padding: 10px 14px;
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             border-radius: 10px;
             font-size: 0.83rem;
         }
 
-        .service-chip-name { font-weight: 500; }
-        .service-chip-price { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+        .service-chip-name {
+            font-weight: 500;
+        }
+
+        .service-chip-price {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
 
         .no-services-msg {
             font-family: var(--font-mono);
@@ -288,7 +357,8 @@
         }
 
         .total-row {
-            display: flex; justify-content: space-between;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
@@ -337,7 +407,9 @@
         .form-section-header {
             padding: 24px 32px;
             border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
         .form-section-num {
@@ -345,10 +417,13 @@
             font-size: 0.65rem;
             letter-spacing: 0.1em;
             color: var(--text-muted);
-            width: 28px; height: 28px;
+            width: 28px;
+            height: 28px;
             border: 1px solid var(--border);
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .form-section-title {
@@ -383,7 +458,9 @@
             color: var(--text-muted);
         }
 
-        .form-input, .form-textarea, .form-select {
+        .form-input,
+        .form-textarea,
+        .form-select {
             background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -394,7 +471,9 @@
             width: 100%;
         }
 
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
             border-color: var(--border-hover);
         }
 
@@ -430,13 +509,15 @@
             text-align: center;
             cursor: none;
             transition: all 0.25s;
-            display: flex; flex-direction: column; gap: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
             align-items: center;
         }
 
         .service-pill:hover {
             border-color: var(--border-hover);
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .service-pill.active {
@@ -452,10 +533,13 @@
         }
 
         /* COMPLEXITY SLIDER */
-        .complexity-slider-wrap { padding: 8px 0; }
+        .complexity-slider-wrap {
+            padding: 8px 0;
+        }
 
         .complexity-labels {
-            display: flex; justify-content: space-between;
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 10px;
         }
 
@@ -480,7 +564,8 @@
 
         .luxury-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px; height: 18px;
+            width: 18px;
+            height: 18px;
             background: var(--text);
             border-radius: 50%;
             cursor: none;
@@ -511,13 +596,23 @@
             font-size: 0.9rem;
             font-weight: 700;
             letter-spacing: 0.04em;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             transition: opacity 0.3s, transform 0.3s;
             cursor: none;
         }
 
-        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
-        .btn-submit:disabled { opacity: 0.4; transform: none; }
+        .btn-submit:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.4;
+            transform: none;
+        }
 
         .submit-note {
             text-align: center;
@@ -539,11 +634,14 @@
         }
 
         .success-icon {
-            width: 64px; height: 64px;
-            background: rgba(255,255,255,0.06);
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.5rem;
             margin-bottom: 28px;
         }
@@ -555,7 +653,10 @@
             margin-bottom: 12px;
         }
 
-        .success-title em { font-style: italic; color: var(--text-muted); }
+        .success-title em {
+            font-style: italic;
+            color: var(--text-muted);
+        }
 
         .success-sub {
             color: var(--text-muted);
@@ -570,18 +671,22 @@
             font-size: 0.8rem;
             letter-spacing: 0.1em;
             padding: 12px 24px;
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             border-radius: 100px;
             margin-bottom: 32px;
             color: var(--text-muted);
         }
 
-        .success-order-id span { color: var(--text); font-weight: 600; }
+        .success-order-id span {
+            color: var(--text);
+            font-weight: 600;
+        }
 
         .btn-view-orders {
             display: inline-flex;
-            align-items: center; gap: 8px;
+            align-items: center;
+            gap: 8px;
             background: var(--text);
             color: var(--bg);
             padding: 14px 32px;
@@ -591,23 +696,47 @@
             letter-spacing: 0.03em;
             transition: opacity 0.3s;
         }
-        .btn-view-orders:hover { opacity: 0.85; }
+
+        .btn-view-orders:hover {
+            opacity: 0.85;
+        }
 
         /* RESPONSIVE */
         @media (max-width: 900px) {
-            .booking-grid { grid-template-columns: 1fr; }
-            .estimate-card { position: static; }
+            .booking-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .estimate-card {
+                position: static;
+            }
         }
 
         @media (max-width: 600px) {
-            .page-wrapper { padding: 120px 20px 80px; }
-            .form-row { grid-template-columns: 1fr; }
-            .services-grid { grid-template-columns: 1fr 1fr; }
-            .navbar { width: calc(100% - 24px); padding: 12px 18px; }
-            .form-section-body { padding: 24px 20px; }
+            .page-wrapper {
+                padding: 120px 20px 80px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .navbar {
+                width: calc(100% - 24px);
+                padding: 12px 18px;
+            }
+
+            .form-section-body {
+                padding: 24px 20px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="cursor-dot" id="cursor-dot"></div>
@@ -616,12 +745,16 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <a href="index.html" class="nav-logo">
-            <img src="favicon.svg" style="width:22px;height:22px;border-radius:5px;vertical-align:middle;margin-right:4px;">
+            <img src="favicon.svg"
+                style="width:22px;height:22px;border-radius:5px;vertical-align:middle;margin-right:4px;">
             DREAMERS DESIGNS
         </a>
         <div class="nav-right">
             <a href="index.html" class="nav-back">
-                <svg viewBox="0 0 14 14" fill="none" width="13"><path d="M12.3333 7H1.66667M1.66667 7L6.33333 2.33333M1.66667 7L6.33333 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 14 14" fill="none" width="13">
+                    <path d="M12.3333 7H1.66667M1.66667 7L6.33333 2.33333M1.66667 7L6.33333 11.6667"
+                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
                 Back
             </a>
             <div class="nav-user-pill" id="nav-user-pill">
@@ -635,10 +768,14 @@
     <div id="auth-guard">
         <p class="guard-eyebrow">ACCESS REQUIRED</p>
         <h1 class="guard-title">Sign in to<br><em>book a service</em></h1>
-        <p class="guard-sub">Create an account or sign in to book your project with Dreamers Designs and track it in real time.</p>
+        <p class="guard-sub">Create an account or sign in to book your project with Dreamers Designs and track it in
+            real time.</p>
         <a href="auth/login.html" class="btn-primary">
             Sign In
-            <svg viewBox="0 0 14 14" fill="none" width="14"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 14 14" fill="none" width="14">
+                <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor"
+                    stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
         </a>
     </div>
 
@@ -649,7 +786,8 @@
             <div class="page-header">
                 <p class="page-eyebrow">06 / COMMISSION</p>
                 <h1 class="page-title">Book your<br><em>masterpiece.</em></h1>
-                <p class="page-sub">Configure your project below. Once submitted, your order is instantly tracked in your client portal.</p>
+                <p class="page-sub">Configure your project below. Once submitted, your order is instantly tracked in
+                    your client portal.</p>
             </div>
 
             <div class="booking-grid">
@@ -661,11 +799,16 @@
                     <div id="success-state">
                         <div class="success-icon">✦</div>
                         <h2 class="success-title">Order <em>confirmed.</em></h2>
-                        <p class="success-sub">Your project has been logged and our principal partners will reach out within 24 hours to begin the discovery workshop.</p>
+                        <p class="success-sub">Your project has been logged and our principal partners will reach out
+                            within 24 hours to begin the discovery workshop.</p>
                         <div class="success-order-id">ORDER ID: <span id="success-order-id-val">—</span></div>
                         <a href="orders.html" class="btn-view-orders">
                             View My Orders
-                            <svg viewBox="0 0 14 14" fill="none" width="13"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <svg viewBox="0 0 14 14" fill="none" width="13">
+                                <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                    stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
                         </a>
                     </div>
 
@@ -697,27 +840,33 @@
                         </div>
                         <div class="form-section-body">
                             <div class="services-grid" id="services-grid">
-                                <div class="service-pill" data-service="Web Development" data-cost="499" data-time="4" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="Web Development" data-cost="499" data-time="4"
+                                    onclick="toggleService(this)">
                                     <span>Web Development</span>
                                     <span class="service-pill-price">from $499</span>
                                 </div>
-                                <div class="service-pill" data-service="AI Chatbots" data-cost="299" data-time="3" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="AI Chatbots" data-cost="299" data-time="3"
+                                    onclick="toggleService(this)">
                                     <span>AI Chatbots</span>
                                     <span class="service-pill-price">from $299</span>
                                 </div>
-                                <div class="service-pill" data-service="Automation Systems" data-cost="399" data-time="3" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="Automation Systems" data-cost="399"
+                                    data-time="3" onclick="toggleService(this)">
                                     <span>Automation Systems</span>
                                     <span class="service-pill-price">from $399</span>
                                 </div>
-                                <div class="service-pill" data-service="Branding & Graphics" data-cost="199" data-time="2" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="Branding & Graphics" data-cost="199"
+                                    data-time="2" onclick="toggleService(this)">
                                     <span>Branding & Graphics</span>
                                     <span class="service-pill-price">from $199</span>
                                 </div>
-                                <div class="service-pill" data-service="Thumbnail Design" data-cost="49" data-time="1" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="Thumbnail Design" data-cost="49" data-time="1"
+                                    onclick="toggleService(this)">
                                     <span>Thumbnail Design</span>
                                     <span class="service-pill-price">from $49</span>
                                 </div>
-                                <div class="service-pill" data-service="Social Media Creatives" data-cost="149" data-time="2" onclick="toggleService(this)">
+                                <div class="service-pill" data-service="Social Media Creatives" data-cost="149"
+                                    data-time="2" onclick="toggleService(this)">
                                     <span>Social Media Creatives</span>
                                     <span class="service-pill-price">from $149</span>
                                 </div>
@@ -738,7 +887,8 @@
                                     <span class="complexity-label-item">Multi-Integration</span>
                                     <span class="complexity-label-item">Enterprise</span>
                                 </div>
-                                <input type="range" min="1" max="3" value="1" step="1" class="luxury-slider" id="complexity-slider" oninput="updateComplexity(this)">
+                                <input type="range" min="1" max="3" value="1" step="1" class="luxury-slider"
+                                    id="complexity-slider" oninput="updateComplexity(this)">
                                 <p class="complexity-current" id="complexity-label">Standard Infrastructure (1×)</p>
                             </div>
                         </div>
@@ -753,7 +903,9 @@
                         <div class="form-section-body">
                             <div class="form-group">
                                 <label class="form-label">DESCRIBE YOUR PROJECT</label>
-                                <textarea class="form-textarea" id="field-brief" placeholder="Tell us about your vision, goals, references, and any specific requirements..." rows="5"></textarea>
+                                <textarea class="form-textarea" id="field-brief"
+                                    placeholder="Tell us about your vision, goals, references, and any specific requirements..."
+                                    rows="5"></textarea>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
@@ -786,9 +938,14 @@
                     <div class="submit-section">
                         <button class="btn-submit" id="submit-btn" onclick="submitBooking()">
                             <span id="submit-btn-text">Commission Project</span>
-                            <svg viewBox="0 0 14 14" fill="none" width="14"><path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <svg viewBox="0 0 14 14" fill="none" width="14">
+                                <path d="M1.66663 7H12.3333M12.3333 7L7.66663 2.33333M12.3333 7L7.66663 11.6667"
+                                    stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
                         </button>
-                        <p class="submit-note">By submitting, you agree that this is an initial project inquiry. A discovery call will confirm final scope and pricing.</p>
+                        <p class="submit-note">By submitting, you agree that this is an initial project inquiry. A
+                            discovery call will confirm final scope and pricing.</p>
                     </div>
 
                 </div>
@@ -815,7 +972,8 @@
                             <span class="total-label">ESTIMATE</span>
                             <span class="total-value">$<span id="summary-cost">0</span></span>
                         </div>
-                        <p class="total-disclaimer">* Final pricing confirmed after discovery workshop. This is a directional estimate only.</p>
+                        <p class="total-disclaimer">* Final pricing confirmed after discovery workshop. This is a
+                            directional estimate only.</p>
                     </div>
                 </div>
 
@@ -824,8 +982,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://llzihnjhdqgcxbuooemz.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsemlobmpoZHFnY3hidW9vZW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTUwOTYsImV4cCI6MjA5NjEzMTA5Nn0.44TyVe7VDV3jzWvTsK-Qho93aZpMorFCdcttxq40lcM';
+        const SUPABASE_URL = 'https://nikibjzvpmplsegbziia.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pa2lianp2cG1wbHNlZ2J6aWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NjMwOTcsImV4cCI6MjA5NzIzOTA5N30.AmYlCK_gIuR7VYFYTpE6IMMLwyYX9EI865QTcOFiWkQ';
 
         let _supabase;
         let currentUser = null;
@@ -1022,4 +1180,5 @@
         }
     </script>
 </body>
+
 </html>
