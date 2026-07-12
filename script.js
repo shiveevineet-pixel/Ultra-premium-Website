@@ -212,7 +212,7 @@ function initCustomCursor() {
     });
 }
 
-/* 4. THREE.JS SINGULARITY — fractured core + accretion disk + lightning */
+/* 4. THREE.JS ENTITY — raymarched liquid-chrome organism (SDF metaballs, real-time reflections) */
 function initHeroScene() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
@@ -223,11 +223,9 @@ function initHeroScene() {
     let webglSupported = true;
     try {
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: false });
+        camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.35;
     } catch (e) {
         webglSupported = false;
         console.warn("WebGL not supported. Running 2D Canvas fallback.");
@@ -238,184 +236,175 @@ function initHeroScene() {
         return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    // Heavier shader (per-pixel raymarching) — cap pixel ratio a bit tighter than other scenes
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.position.set(0, 0, 13);
 
-    // ─── Fractured core: shard field from a subdivided icosahedron's faces ─
-    const baseRadius = 3.2;
-    const icoGeo = new THREE.IcosahedronGeometry(baseRadius, 1).toNonIndexed();
-    const posAttr = icoGeo.attributes.position;
-    const faceCount = posAttr.count / 3;
-
-    const vA = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
-    const vB = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
-    const edgeLen = vA.distanceTo(vB);
-    const h = (edgeLen * Math.sqrt(3)) / 2;
-
-    const shardGeo = new THREE.BufferGeometry();
-    shardGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-        0, (h * 2) / 3, 0,
-        -edgeLen / 2, -h / 3, 0,
-        edgeLen / 2, -h / 3, 0
-    ]), 3));
-    shardGeo.setIndex([0, 1, 2]);
-    shardGeo.computeVertexNormals();
-
-    const shardMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x0A0A0A,
-        emissive: 0x1a1a1a,
-        emissiveIntensity: 0.2,
-        metalness: 0.9,
-        roughness: 0.15,
-        clearcoat: 0.7,
-        clearcoatRoughness: 0.25,
-        side: THREE.DoubleSide,
-    });
-
-    const shardMesh = new THREE.InstancedMesh(shardGeo, shardMaterial, faceCount);
-    scene.add(shardMesh);
-
-    const zAxis = new THREE.Vector3(0, 0, 1);
-    const faceData = [];
-    const shardWorldPos = []; // updated live each frame, read by the lightning system
-    for (let f = 0; f < faceCount; f++) {
-        const i0 = f * 3, i1 = f * 3 + 1, i2 = f * 3 + 2;
-        const p0 = new THREE.Vector3().fromBufferAttribute(posAttr, i0);
-        const p1 = new THREE.Vector3().fromBufferAttribute(posAttr, i1);
-        const p2 = new THREE.Vector3().fromBufferAttribute(posAttr, i2);
-        const center = new THREE.Vector3().add(p0).add(p1).add(p2).multiplyScalar(1 / 3);
-        const normal = center.clone().normalize();
-
-        faceData.push({
-            normal,
-            quat: new THREE.Quaternion().setFromUnitVectors(zAxis, normal),
-            phase: Math.random() * Math.PI * 2,
-            spinSpeed: (Math.random() - 0.5) * 0.9,
-            floatAmp: 0.4 + Math.random() * 0.9,
-        });
-        shardWorldPos.push(new THREE.Vector3());
-    }
-
-    // ─── Counter-rotating wireframe shell (structural halo) ────────────────
-    const wireGeo = new THREE.IcosahedronGeometry(baseRadius * 1.6, 0);
-    const wireMat = new THREE.MeshBasicMaterial({ color: 0x0A0A0A, wireframe: true, transparent: true, opacity: 0.12 });
-    const wireShell = new THREE.Mesh(wireGeo, wireMat);
-    scene.add(wireShell);
-
-    // ─── Glowing singularity core ───────────────────────────────────────────
-    const coreGeo = new THREE.IcosahedronGeometry(0.55, 2);
-    const coreMat = new THREE.MeshBasicMaterial({ color: 0xf4f4f4, transparent: true, opacity: 0.95 });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    scene.add(core);
-    const coreGlowGeo = new THREE.IcosahedronGeometry(1.0, 1);
-    const coreGlowMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false });
-    const coreGlow = new THREE.Mesh(coreGlowGeo, coreGlowMat);
-    scene.add(coreGlow);
-
-    // ─── Swirling accretion disk ────────────────────────────────────────────
-    const diskCount = 1800;
-    const diskData = [];
-    const diskPos = new Float32Array(diskCount * 3);
-    const diskColor = new Float32Array(diskCount * 3);
-    const tiltMat = new THREE.Matrix4().makeRotationX(1.15);
-
-    for (let i = 0; i < diskCount; i++) {
-        const radius = baseRadius * 1.9 + Math.random() * baseRadius * 3.2;
-        const angle = Math.random() * Math.PI * 2;
-        const speed = (0.5 / Math.sqrt(radius)) * (Math.random() > 0.5 ? 1 : -1) * 0.6;
-        const heightJitter = (Math.random() - 0.5) * (0.25 + radius * 0.04);
-        diskData.push({ radius, angle, speed, heightJitter, twinkle: Math.random() * Math.PI * 2 });
-
-        const nearness = 1 - Math.min(1, (radius - baseRadius * 1.9) / (baseRadius * 3.2));
-        diskColor[i * 3] = 0.75 + nearness * 0.25;
-        diskColor[i * 3 + 1] = 0.75 + nearness * 0.25;
-        diskColor[i * 3 + 2] = 0.78 + nearness * 0.22;
-    }
-    const diskGeo = new THREE.BufferGeometry();
-    diskGeo.setAttribute('position', new THREE.BufferAttribute(diskPos, 3));
-    diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColor, 3));
-    const diskMat = new THREE.PointsMaterial({
-        size: 0.05, vertexColors: true, transparent: true, opacity: 0.85,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-    });
-    const disk = new THREE.Points(diskGeo, diskMat);
-    scene.add(disk);
-
-    // ─── Crackling lightning arcs between shards ────────────────────────────
-    const arcCount = 7;
-    const arcSegments = 7;
-    const arcVerts = arcCount * arcSegments * 2 * 3; // segments -> pairs of points -> xyz
-    const arcPos = new Float32Array(arcVerts);
-    const arcGeo = new THREE.BufferGeometry();
-    arcGeo.setAttribute('position', new THREE.BufferAttribute(arcPos, 3));
-    const arcMat = new THREE.LineBasicMaterial({
-        color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const arcs = new THREE.LineSegments(arcGeo, arcMat);
-    scene.add(arcs);
-
-    function regenerateArcs() {
-        for (let a = 0; a < arcCount; a++) {
-            const fromIdx = Math.floor(Math.random() * faceCount);
-            const toIdx = Math.floor(Math.random() * faceCount);
-            const start = shardWorldPos[fromIdx];
-            const end = shardWorldPos[toIdx];
-
-            // Midpoint-displacement jagged path
-            const points = [start.clone()];
-            for (let s = 1; s < arcSegments; s++) {
-                const t = s / arcSegments;
-                const p = start.clone().lerp(end, t);
-                const jitter = (1 - Math.abs(t - 0.5) * 2) * 0.9;
-                p.x += (Math.random() - 0.5) * jitter;
-                p.y += (Math.random() - 0.5) * jitter;
-                p.z += (Math.random() - 0.5) * jitter;
-                points.push(p);
-            }
-            points.push(end.clone());
-
-            for (let s = 0; s < arcSegments; s++) {
-                const base = (a * arcSegments + s) * 6;
-                arcPos[base] = points[s].x; arcPos[base + 1] = points[s].y; arcPos[base + 2] = points[s].z;
-                arcPos[base + 3] = points[s + 1].x; arcPos[base + 4] = points[s + 1].y; arcPos[base + 5] = points[s + 1].z;
-            }
+    const vertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = vec4(position.xy, 0.0, 1.0);
         }
-        arcGeo.attributes.position.needsUpdate = true;
-    }
+    `;
 
-    // ─── Ambient starfield for depth ───────────────────────────────────────
-    const starCount = 260;
-    const starPos = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-        const r = 9 + Math.random() * 11;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(Math.random() * 2 - 1);
-        starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-        starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        starPos[i * 3 + 2] = r * Math.cos(phi);
-    }
-    const starGeo = new THREE.BufferGeometry();
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
-        color: 0x0A0A0A, size: 0.045, transparent: true, opacity: 0.3
-    }));
-    scene.add(stars);
+    // Raymarched signed-distance-field "organism": three morphing metaballs
+    // smooth-blended into one liquid-chrome surface, with a mouse-driven
+    // dent/poke deformation and a click-triggered ripple shockwave across
+    // the surface. Shaded with fake fresnel + reflection gradient so it
+    // reads as polished liquid metal rather than a flat 3D render.
+    const fragmentShader = `
+        precision highp float;
+        uniform float uTime;
+        uniform vec2 uMouse;
+        uniform float uAspect;
+        uniform float uWarp;
+        varying vec2 vUv;
 
-    // ─── Lighting ───────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-    dirLight.position.set(10, 15, 10);
-    scene.add(dirLight);
-    const pointLight = new THREE.PointLight(0xffffff, 3.2, 100);
-    pointLight.position.set(0, 0, 12);
-    scene.add(pointLight);
-    const coreLight = new THREE.PointLight(0xffffff, 2.5, 30);
-    scene.add(coreLight);
+        mat2 rot(float a) {
+            float s = sin(a), c = cos(a);
+            return mat2(c, -s, s, c);
+        }
 
-    const clock = new THREE.Clock();
+        float hash(vec3 p) {
+            p = fract(p * 0.3183099 + 0.1);
+            p *= 17.0;
+            return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+        }
+
+        float noise3(vec3 p) {
+            vec3 i = floor(p);
+            vec3 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            return mix(
+                mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                    mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                    mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y),
+                f.z);
+        }
+
+        float smin(float a, float b, float k) {
+            float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+            return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        float smax(float a, float b, float k) {
+            return -smin(-a, -b, k);
+        }
+
+        float sdSphere(vec3 p, float r) {
+            return length(p) - r;
+        }
+
+        float map(vec3 p) {
+            vec3 p1 = p - vec3(sin(uTime * 0.6) * 0.55, cos(uTime * 0.5) * 0.4, sin(uTime * 0.35) * 0.3);
+            float d = sdSphere(p1, 0.85);
+
+            vec3 p2 = p - vec3(cos(uTime * 0.45) * 0.7, sin(uTime * 0.65) * 0.5, cos(uTime * 0.4) * 0.4);
+            d = smin(d, sdSphere(p2, 0.5), 0.55);
+
+            vec3 p3 = p - vec3(sin(uTime * 0.3 + 2.0) * 0.55, cos(uTime * 0.5 + 1.0) * 0.6, sin(uTime * 0.55) * 0.45);
+            d = smin(d, sdSphere(p3, 0.42), 0.6);
+
+            // Cursor pokes/dents the surface like a finger pressing into liquid metal
+            vec3 poke = vec3(uMouse * 1.7, 0.55);
+            float pokeDist = sdSphere(p - poke, 0.55 + uWarp * 0.35);
+            d = smax(d, -pokeDist, 0.35);
+
+            // Fine surface ripple, domain-warped noise
+            d += (noise3(p * 3.2 + uTime * 0.4) - 0.5) * 0.045;
+
+            // Radial shockwave ripple on click, travels outward from center
+            float distFromCenter = length(p);
+            d += sin(distFromCenter * 9.0 - uTime * 3.0) * 0.05 * uWarp;
+
+            return d;
+        }
+
+        vec3 estimateNormal(vec3 p) {
+            vec2 e = vec2(0.0015, 0.0);
+            return normalize(vec3(
+                map(p + e.xyy) - map(p - e.xyy),
+                map(p + e.yxy) - map(p - e.yxy),
+                map(p + e.yyx) - map(p - e.yyx)
+            ));
+        }
+
+        void main() {
+            vec2 uv = vUv - 0.5;
+            uv.x *= uAspect;
+
+            vec3 ro = vec3(0.0, 0.0, 3.3);
+            vec3 rd = normalize(vec3(uv, -1.7));
+
+            float yaw = uMouse.x * 0.5;
+            float pitch = uMouse.y * 0.35;
+            ro.xz *= rot(yaw);
+            rd.xz *= rot(yaw);
+            ro.yz *= rot(pitch);
+            rd.yz *= rot(pitch);
+
+            float t = 0.0;
+            float d = 1.0;
+            int steps = 0;
+            for (int i = 0; i < 72; i++) {
+                vec3 p = ro + rd * t;
+                d = map(p);
+                if (d < 0.0012 || t > 8.0) break;
+                t += d * 0.72;
+                steps = i;
+            }
+
+            vec3 bg = mix(vec3(1.0), vec3(0.96), smoothstep(0.0, 1.0, length(uv)));
+
+            if (t > 8.0) {
+                gl_FragColor = vec4(bg, 1.0);
+                return;
+            }
+
+            vec3 p = ro + rd * t;
+            vec3 nor = estimateNormal(p);
+
+            vec3 lightDir = normalize(vec3(0.5 - uMouse.x * 0.6, 0.6 - uMouse.y * 0.4, 0.7));
+            float diff = max(dot(nor, lightDir), 0.0);
+            float fresnel = pow(1.0 - max(dot(-rd, nor), 0.0), 3.0);
+
+            vec3 reflDir = reflect(rd, nor);
+            float envGrad = clamp(reflDir.y * 0.5 + 0.5, 0.0, 1.0);
+            float ao = 1.0 - float(steps) / 72.0;
+
+            float shade = envGrad * 0.35 + diff * 0.45 + fresnel * 0.85;
+            shade *= 0.55 + ao * 0.45;
+            shade += uWarp * 0.3;
+
+            vec3 metal = mix(vec3(0.03, 0.03, 0.035), vec3(1.0), clamp(shade, 0.0, 1.0));
+
+            gl_FragColor = vec4(metal, 1.0);
+        }
+    `;
+
+    const uniforms = {
+        uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0, 0) },
+        uAspect: { value: window.innerWidth / window.innerHeight },
+        uWarp: { value: 0 },
+    };
+
+    const material = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader,
+        fragmentShader,
+        depthWrite: false,
+        depthTest: false,
+    });
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+    plane.frustumCulled = false;
+    scene.add(plane);
+
     let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let warp = 0, warpTarget = 0;
 
     window.addEventListener('mousemove', (e) => {
         mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -429,123 +418,34 @@ function initHeroScene() {
         }
     });
 
-    // Reused scratch objects to avoid per-frame allocation
-    const dummy = new THREE.Object3D();
-    const tmpPos = new THREE.Vector3();
-    const tmpSpinQuat = new THREE.Quaternion();
-    const tmpFinalQuat = new THREE.Quaternion();
-    const diskVec = new THREE.Vector3();
+    // Click sends a shockwave ripple through the liquid-metal surface
+    canvas.addEventListener('click', () => {
+        warpTarget = 1.0;
+    });
 
-    let frameCount = 0;
-    let shakeSeed = 0;
+    const clock = new THREE.Clock();
 
     function animate() {
         requestAnimationFrame(animate);
-        mouse.x += (mouse.targetX - mouse.x) * 0.05;
-        mouse.y += (mouse.targetY - mouse.y) * 0.05;
-
         const time = clock.getElapsedTime();
-        const mouseInfluence = Math.sqrt(mouse.x * mouse.x + mouse.y * mouse.y);
 
-        // Periodic shockwave burst — sharp spike, slow recharge
-        const shockwave = Math.pow(Math.max(0, Math.sin(time * 0.22)), 10);
-        const globalPulse = (Math.sin(time * 0.35) + 1) / 2;
+        mouse.x += (mouse.targetX - mouse.x) * 0.07;
+        mouse.y += (mouse.targetY - mouse.y) * 0.07;
 
-        // Shard core
-        for (let f = 0; f < faceCount; f++) {
-            const d = faceData[f];
-            const explode = 0.4
-                + globalPulse * 1.3
-                + shockwave * 2.6
-                + Math.sin(time * 0.8 + d.phase) * d.floatAmp * 0.3
-                + mouseInfluence * 1.4;
+        warpTarget *= 0.93;
+        warp += (warpTarget - warp) * 0.1;
 
-            tmpPos.copy(d.normal).multiplyScalar(baseRadius + explode);
-            tmpSpinQuat.setFromAxisAngle(d.normal, time * d.spinSpeed + d.phase);
-            tmpFinalQuat.copy(d.quat).multiply(tmpSpinQuat);
-
-            dummy.position.copy(tmpPos);
-            dummy.quaternion.copy(tmpFinalQuat);
-            dummy.scale.setScalar(0.9 + Math.sin(time * 1.4 + d.phase) * 0.08 + shockwave * 0.15);
-            dummy.updateMatrix();
-            shardMesh.setMatrixAt(f, dummy.matrix);
-
-            shardWorldPos[f].copy(tmpPos);
-        }
-        shardMesh.instanceMatrix.needsUpdate = true;
-        shardMaterial.emissiveIntensity = 0.2 + shockwave * 1.4;
-
-        // Swirling accretion disk
-        for (let i = 0; i < diskCount; i++) {
-            const d = diskData[i];
-            d.angle += d.speed * 0.016 * (1 + shockwave * 0.8);
-            const wobble = Math.sin(time * 1.5 + d.twinkle) * 0.06;
-            diskVec.set(
-                Math.cos(d.angle) * (d.radius + shockwave * 0.6),
-                d.heightJitter + wobble,
-                Math.sin(d.angle) * (d.radius + shockwave * 0.6)
-            );
-            diskVec.applyMatrix4(tiltMat);
-
-            // Mouse acts as a secondary gravity well distorting nearby particles
-            const mx = mouse.x * 6, my = -mouse.y * 4;
-            const dx = diskVec.x - mx, dy = diskVec.y - my;
-            const distToMouse = Math.sqrt(dx * dx + dy * dy);
-            if (distToMouse < 2.5) {
-                const push = (2.5 - distToMouse) * 0.4;
-                diskVec.x += (dx / (distToMouse + 0.001)) * push;
-                diskVec.y += (dy / (distToMouse + 0.001)) * push;
-            }
-
-            diskPos[i * 3] = diskVec.x;
-            diskPos[i * 3 + 1] = diskVec.y;
-            diskPos[i * 3 + 2] = diskVec.z;
-        }
-        diskGeo.attributes.position.needsUpdate = true;
-        diskMat.opacity = 0.6 + shockwave * 0.4;
-
-        // Lightning: regenerate periodically, flicker opacity every frame
-        frameCount++;
-        if (frameCount % 9 === 0) regenerateArcs();
-        arcMat.opacity = Math.random() > 0.5 ? (0.15 + Math.random() * 0.35 + shockwave * 0.5) : 0;
-
-        // Core pulse + glow
-        const coreScale = 1 + shockwave * 0.8 + Math.sin(time * 2.2) * 0.06;
-        core.scale.setScalar(coreScale);
-        coreGlow.scale.setScalar(coreScale * (1.4 + shockwave * 0.6));
-        coreGlow.rotation.y = time * 0.3;
-        coreLight.intensity = 2.0 + shockwave * 6.0;
-
-        // Parallax + autonomous drift for the whole formation
-        shardMesh.rotation.y = time * 0.08 + mouse.x * 0.4;
-        shardMesh.rotation.x = mouse.y * 0.25;
-        wireShell.rotation.y = -time * 0.05;
-        wireShell.rotation.x = mouse.y * 0.15;
-        disk.rotation.y = time * 0.015;
-        stars.rotation.y = time * 0.01;
-
-        pointLight.position.x = mouse.x * 14;
-        pointLight.position.y = mouse.y * 8;
-
-        // Camera: parallax drift + shockwave shake + slow zoom punch
-        shakeSeed += 1;
-        const shakeMag = shockwave * 0.12;
-        const shakeX = (Math.sin(shakeSeed * 12.9) - 0.5) * shakeMag;
-        const shakeY = (Math.cos(shakeSeed * 7.3) - 0.5) * shakeMag;
-
-        camera.position.x += (mouse.x * 1.2 + shakeX - camera.position.x) * 0.08;
-        camera.position.y += (mouse.y * 0.8 + shakeY - camera.position.y) * 0.08;
-        camera.position.z = 13 - shockwave * 1.2;
-        camera.lookAt(0, 0, 0);
+        uniforms.uTime.value = time;
+        uniforms.uMouse.value.set(mouse.x, mouse.y);
+        uniforms.uWarp.value = warp;
 
         renderer.render(scene, camera);
     }
     animate();
 
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        uniforms.uAspect.value = window.innerWidth / window.innerHeight;
     });
 }
 
