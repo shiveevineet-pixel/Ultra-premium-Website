@@ -25,7 +25,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.36/dist/lenis.min.js" defer></script>
 
-    <!-- Three.js for 3D Platinum Ribbon -->
+    <!-- Three.js for 3D Singularity hero scene -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 
     <!-- Core Script -->
@@ -194,7 +194,7 @@
             <div class="hero-canvas-label">
                 <div class="coords"><span class="label">SYS_TRACK:</span> <span id="coord-x">0.00</span>, <span
                         id="coord-y">0.00</span></div>
-                <div class="status-indicator"><span class="pulse-ring"></span>3D RIBBON RUNNING</div>
+                <div class="status-indicator"><span class="pulse-ring"></span>SINGULARITY CORE ONLINE</div>
             </div>
 
             <div class="hero-wrapper">
@@ -1032,8 +1032,8 @@
 
     <script>
         // ─── GROQ API CONFIG ───────────────────────────────────────────────────────
-        const GROQ_API_KEY = "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";
-        const GROQ_MODEL = 'openai/gpt-oss-120b'; // Qwen 3 32B — reliable & highly capable
+        const GROQ_API_KEY = "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"; // ← Paste your Groq API key here
+        const GROQ_MODEL = 'openai/gpt-oss-120b'; // OpenAI's open-weight 120B model, served via Groq
 
         const DREAM_SYSTEM_PROMPT = `You are Dream, the AI concierge for Dreamers Designs — a premium Swiss-inspired digital studio based in Gurugram, India. You represent a luxury brand that engineers bespoke websites, AI chatbots, automation systems, branding, thumbnail design, and social media creatives.
 
@@ -1104,24 +1104,14 @@ If asked something outside Dreamers Designs' scope, politely say you can only as
                             { role: 'system', content: DREAM_SYSTEM_PROMPT },
                             ...dreamHistory
                         ],
-                        max_tokens: 4096,
-                        temperature: 0.6
+                        max_tokens: 400,
+                        temperature: 0.65
                     })
                 });
 
                 const data = await res.json();
-
-                // Check for API errors (auth failures, model not found, rate limits, etc.)
-                if (!res.ok) {
-                    console.error('[Dream] Groq API error:', res.status, data);
-                    throw new Error(data?.error?.message || `API returned ${res.status}`);
-                }
-
-                let reply = data?.choices?.[0]?.message?.content?.trim()
+                const reply = data?.choices?.[0]?.message?.content?.trim()
                     || 'Something went wrong on my end. Please try again.';
-
-                // Strip <think>...</think> tags from reasoning models (Qwen3 etc.)
-                reply = reply.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
                 // Save assistant turn
                 dreamHistory.push({ role: 'assistant', content: reply });
@@ -1137,7 +1127,6 @@ If asked something outside Dreamers Designs' scope, politely say you can only as
                 msgArea.appendChild(aiBubble);
 
             } catch (err) {
-                console.error('[Dream] Chat error:', err);
                 document.getElementById('dream-typing')?.remove();
                 const errBubble = document.createElement('div');
                 errBubble.className = 'dream-msg dream-msg-ai';
